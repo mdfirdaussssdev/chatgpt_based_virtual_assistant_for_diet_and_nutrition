@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "40958619055",
+    "project_id": "intaketrackvirtualassistant",
+    "storage_bucket": "intaketrackvirtualassistant.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:40958619055:android:e28ca52f7a97159053935a",
+        "android_client_info": {
+          "package_name": "com.ntu.chatgpt_based_virtual_assistant_for_diet_and_nutrition"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2mxR1typmZU2mMSbODnuUYR2SsgVsLBo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
