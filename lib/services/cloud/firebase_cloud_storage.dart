@@ -65,7 +65,7 @@ class FirebaseCloudStorage {
       ownerUserIdFieldName: ownerUserId,
       dobFieldName: userDateOfBirth,
       weightFieldName: userWeight,
-      heightFieldName: heightFieldName,
+      heightFieldName: userHeight,
       diseasesFieldName: userDiseases,
       goalFieldName: userGoal,
     });
