@@ -24,6 +24,7 @@ class _SignUpViewState extends State<SignUpView> {
   late final TextEditingController _height;
   late final FirebaseCloudStorage _userDetailsService;
   bool _isPasswordVisible = false;
+  String? _selectedGoal;
 
   // For multiselect
   final List<String> _listOfDiseases = ['Diabetes', 'High Blood Pressure'];
@@ -33,10 +34,6 @@ class _SignUpViewState extends State<SignUpView> {
       _selectedValues = selectedValues;
     });
   }
-
-  // Initial state, false for both buttons (unselected)
-  // index 0 is for Gain Weight, index 1 for Lose Weight
-  final List<bool> _goalIsSelected = [false, false];
 
   // Declare the picked DateTime object
   DateTime? _selectedDate;
@@ -79,275 +76,310 @@ class _SignUpViewState extends State<SignUpView> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sign Up'),
-        leading: IconButton(
-          onPressed: () {
-            if (context.mounted) {
-              Navigator.of(context)
-                  .pushNamedAndRemoveUntil(loginRoute, (route) => false);
-            }
-          },
-          icon: const Icon(Icons.arrow_back),
-        ),
-      ),
+      appBar: appBar(context),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
           child: Column(
             children: [
-              TextField(
-                controller: _email,
-                enableSuggestions: false,
-                autocorrect: false,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  hintText: 'Enter your email here',
-                ),
-              ),
+              _emailField(),
               // insert space
-              const SizedBox(height: 20),
-              TextField(
-                controller: _password,
-                // if its visible, obscureText should be false
-                obscureText: !_isPasswordVisible,
-                enableSuggestions: false,
-                autocorrect: false,
-                decoration: InputDecoration(
-                  hintText: 'Enter your password here',
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(
-                        () {
-                          _isPasswordVisible = !_isPasswordVisible;
-                        },
-                      );
-                    },
-                    icon: Icon(_isPasswordVisible
-                        ? Icons.visibility
-                        : Icons.visibility_off),
-                  ),
-                ),
-              ),
+              SizedBox(height: screenHeight * 0.03),
+              _passwordField(),
               // insert space
-              const SizedBox(height: 20),
-              TextField(
-                controller: _dateOfBirth,
-                readOnly: true,
-                decoration: InputDecoration(
-                  hintText: 'Select your date of birth',
-                  filled: true,
-                  prefixIcon: IconButton(
-                    icon: const Icon(Icons.calendar_today),
-                    onPressed: () => _selectDate(context),
-                  ),
-                ),
-              ),
+              SizedBox(height: screenHeight * 0.03),
+              _dateOfBirthField(context),
               // insert space
-              const SizedBox(height: 20),
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          TextField(
-                            controller: _weight,
-                            textAlign: TextAlign.center,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: <TextInputFormatter>[
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                            decoration: const InputDecoration(
-                              suffixText: '(kg)',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                          // insert space in between the textbox and text
-                          const SizedBox(height: 8),
-                          const Text('Weight in kg',
-                              style: TextStyle(fontSize: 16)),
-                        ],
-                      ),
-                    ),
-                    // insert space in between
-                    const SizedBox(width: 20),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          TextField(
-                            controller: _height,
-                            textAlign: TextAlign.center,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: <TextInputFormatter>[
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                            decoration: const InputDecoration(
-                              suffixText: '(cm)',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                          // insert space in between the textbox and text
-                          const SizedBox(height: 8),
-                          const Text('Height in cm',
-                              style: TextStyle(fontSize: 16)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: DropDownMultiSelect(
-                  options: _listOfDiseases,
-                  onChanged: _onChanged,
-                  selectedValues: _selectedValues,
-                  // hint: const Text('data'),
-                  whenEmpty: 'Select diseases (if applicable)',
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    width: 1.0,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    const Text(
-                      'Select Your Goal',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    ToggleButtons(
-                      isSelected: _goalIsSelected,
-                      onPressed: (int index) {
-                        setState(() {
-                          // Toggle the selected button, ensuring only one can be selected
-                          for (int i = 0; i < _goalIsSelected.length; i++) {
-                            _goalIsSelected[i] = i == index;
-                          }
-                        });
-                      },
-                      borderColor: Colors.grey,
-                      selectedBorderColor: Colors.grey,
-                      children: const [
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          child: Text('Gain Weight'),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          child: Text('Lose Weight'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      _goalIsSelected[0]
-                          ? 'Selected: Gain Weight'
-                          : _goalIsSelected[1]
-                              ? 'Selected: Lose Weight'
-                              : 'Please select an option',
-                    ),
-                  ],
-                ),
-              ),
-              TextButton(
-                onPressed: () async {
-                  final email = _email.text;
-                  final password = _password.text;
-                  try {
-                    if (_selectedDate == null ||
-                        _weight.text.isEmpty ||
-                        _height.text.isEmpty ||
-                        (_goalIsSelected[0] == false &&
-                            _goalIsSelected[1] == false)) {
-                      throw EmptyFieldViewException(
-                          'All fields must be filled');
-                    }
-                    AuthUser newUser = await AuthService.firebase().createUser(
-                      id: email,
-                      password: password,
-                    );
-                    await _userDetailsService.createNewUserDetails(
-                        ownerUserId: newUser.id,
-                        userDateOfBirth: _selectedDate!,
-                        userWeight: int.parse(_weight.text),
-                        userHeight: int.parse(_height.text),
-                        userDiseases: _selectedValues,
-                        userGoal: _goalIsSelected[0]
-                            ? 'Gain Weight'
-                            : _goalIsSelected[1]
-                                ? 'Lose Weight'
-                                : 'No Goal Selected');
-                    await AuthService.firebase().sendEmailVerification();
-                    if (context.mounted) {
-                      Navigator.of(context).pushNamed(verifyEmailRoute);
-                    }
-                  } on EmptyFieldViewException catch (e) {
-                    if (context.mounted) {
-                      await showErrorDialog(
-                        context,
-                        e.message,
-                      );
-                    }
-                  } on WeakPasswordAuthException {
-                    if (context.mounted) {
-                      await showErrorDialog(
-                        context,
-                        'Weak Password',
-                      );
-                    }
-                  } on EmailAlreadyInUseAuthException {
-                    if (context.mounted) {
-                      await showErrorDialog(
-                        context,
-                        'Email already in use',
-                      );
-                    }
-                  } on InvalidEmailAuthException {
-                    if (context.mounted) {
-                      await showErrorDialog(
-                        context,
-                        'Invalid Email Entered',
-                      );
-                    }
-                  } on GenericAuthException {
-                    if (context.mounted) {
-                      await showErrorDialog(
-                        context,
-                        'Authentication error',
-                      );
-                    }
-                  }
-                },
-                child: const Text('Sign Up'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                    loginRoute,
-                    (route) => false,
-                  );
-                },
-                child: const Text("Have an account? Login here!"),
-              ),
+              SizedBox(height: screenHeight * 0.03),
+              _weightAndHeightFields(screenHeight),
+              SizedBox(height: screenHeight * 0.03),
+              _selectDiseases(),
+              SizedBox(height: screenHeight * 0.03),
+              _selectYourGoal(),
+              SizedBox(height: screenHeight * 0.02),
+              SizedBox(
+                  width: double.infinity,
+                  child: _signUpButton(context, screenWidth, screenHeight)),
+              _loginButton(context),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  TextButton _signUpButton(BuildContext context, screenHeight, screenWidth) {
+    return TextButton(
+      onPressed: () async {
+        final email = _email.text;
+        final password = _password.text;
+        try {
+          if (_selectedDate == null ||
+              _weight.text.isEmpty ||
+              _height.text.isEmpty ||
+              _selectedGoal == null) {
+            throw EmptyFieldViewException('All fields must be filled');
+          }
+          AuthUser newUser = await AuthService.firebase().createUser(
+            id: email,
+            password: password,
+          );
+          await _userDetailsService.createNewUserDetails(
+              ownerUserId: newUser.id,
+              userDateOfBirth: _selectedDate!,
+              userWeight: int.parse(_weight.text),
+              userHeight: int.parse(_height.text),
+              userDiseases: _selectedValues,
+              userGoal: _selectedGoal!);
+          await AuthService.firebase().sendEmailVerification();
+          if (context.mounted) {
+            Navigator.of(context).pushNamed(verifyEmailRoute);
+          }
+        } on EmptyFieldViewException catch (e) {
+          if (context.mounted) {
+            await showErrorDialog(
+              context,
+              e.message,
+            );
+          }
+        } on WeakPasswordAuthException {
+          if (context.mounted) {
+            await showErrorDialog(
+              context,
+              'Weak Password',
+            );
+          }
+        } on EmailAlreadyInUseAuthException {
+          if (context.mounted) {
+            await showErrorDialog(
+              context,
+              'Email already in use',
+            );
+          }
+        } on InvalidEmailAuthException {
+          if (context.mounted) {
+            await showErrorDialog(
+              context,
+              'Invalid Email Entered',
+            );
+          }
+        } on GenericAuthException {
+          if (context.mounted) {
+            await showErrorDialog(
+              context,
+              'Authentication error',
+            );
+          }
+        }
+      },
+      style: TextButton.styleFrom(
+        backgroundColor: Colors.blue,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+        ),
+      ),
+      child: const Text(
+        'Sign Up',
+        style: TextStyle(color: Colors.white),
+      ),
+    );
+  }
+
+  TextButton _loginButton(BuildContext context) {
+    return TextButton(
+      onPressed: () {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          loginRoute,
+          (route) => false,
+        );
+      },
+      child: const Text("Have an account? Login here!"),
+    );
+  }
+
+  DropDownMultiSelect<String> _selectDiseases() {
+    return DropDownMultiSelect(
+      options: _listOfDiseases,
+      onChanged: _onChanged,
+      selectedValues: _selectedValues,
+      // hint: const Text('data'),
+      whenEmpty: 'Select diseases (if applicable)',
+      decoration: const InputDecoration(),
+    );
+  }
+
+  Column _selectYourGoal() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        DropdownButtonFormField<String>(
+          value: _selectedGoal,
+          hint: const Text('What is your goal?'), // Initial hint text
+          decoration: const InputDecoration(
+            labelText:
+                'Select your Goal', // Label that stays on top when an item is selected
+            border: OutlineInputBorder(), // Add a border around the dropdown
+          ),
+          items: const [
+            DropdownMenuItem(
+              value: 'Gain Weight',
+              child: Text('Gain Weight'),
+            ),
+            DropdownMenuItem(
+              value: 'Lose Weight',
+              child: Text('Lose Weight'),
+            ),
+          ],
+          onChanged: (String? newValue) {
+            setState(() {
+              _selectedGoal = newValue;
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  Center _weightAndHeightFields(double screenHeight) {
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                TextField(
+                  controller: _weight,
+                  textAlign: TextAlign.center,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.digitsOnly
+                  ],
+                  decoration: const InputDecoration(
+                    suffixText: '(kg)',
+                  ),
+                ),
+                // insert space in between the textbox and text
+                SizedBox(height: screenHeight * 0.02),
+                const Text(
+                  'Weight in kg',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Insert horizontal space between the columns
+          SizedBox(width: screenHeight * 0.03),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                TextField(
+                  controller: _height,
+                  textAlign: TextAlign.center,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.digitsOnly
+                  ],
+                  decoration: const InputDecoration(
+                    suffixText: '(cm)',
+                  ),
+                ),
+                // insert space in between the textbox and text
+                SizedBox(height: screenHeight * 0.02),
+                const Text(
+                  'Height in cm',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  TextField _dateOfBirthField(BuildContext context) {
+    return TextField(
+      controller: _dateOfBirth,
+      readOnly: true,
+      decoration: InputDecoration(
+        hintText: 'Select your date of birth',
+        focusedBorder: const OutlineInputBorder(// Default border color
+            ),
+        prefixIcon: IconButton(
+          icon: const Icon(Icons.calendar_today),
+          onPressed: () => _selectDate(context),
+        ),
+      ),
+    );
+  }
+
+  TextField _passwordField() {
+    return TextField(
+      controller: _password,
+      // if its visible, obscureText should be false
+      obscureText: !_isPasswordVisible,
+      enableSuggestions: false,
+      autocorrect: false,
+      decoration: InputDecoration(
+        hintText: 'Enter your password here',
+        suffixIcon: IconButton(
+          onPressed: () {
+            setState(
+              () {
+                _isPasswordVisible = !_isPasswordVisible;
+              },
+            );
+          },
+          icon: Icon(
+              _isPasswordVisible ? Icons.visibility : Icons.visibility_off),
+        ),
+      ),
+    );
+  }
+
+  TextField _emailField() {
+    return TextField(
+      controller: _email,
+      enableSuggestions: false,
+      autocorrect: false,
+      keyboardType: TextInputType.emailAddress,
+      decoration: const InputDecoration(
+        hintText: 'Enter your email here',
+      ),
+    );
+  }
+
+  AppBar appBar(BuildContext context) {
+    return AppBar(
+      title: const Text(
+        'CREATE YOUR ACCOUNT',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF28AADC),
+        ),
+      ),
+      centerTitle: true,
+      leading: IconButton(
+        onPressed: () {
+          if (context.mounted) {
+            Navigator.of(context)
+                .pushNamedAndRemoveUntil(loginRoute, (route) => false);
+          }
+        },
+        icon: const Icon(Icons.arrow_back),
       ),
     );
   }
