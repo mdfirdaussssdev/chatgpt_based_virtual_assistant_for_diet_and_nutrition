@@ -4,3 +4,4 @@ const heightFieldName = 'height';
 const diseasesFieldName = 'diseases';
 const dobFieldName = 'date_of_birth';
 const goalFieldName = 'goal';
+const genderFieldName = 'gender';

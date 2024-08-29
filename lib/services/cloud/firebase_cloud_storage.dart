@@ -21,6 +21,7 @@ class FirebaseCloudStorage {
     required int userWeight,
     required int userHeight,
     required List<String> userDiseases,
+    required String userGender,
     required String userGoal,
   }) async {
     try {
@@ -29,6 +30,7 @@ class FirebaseCloudStorage {
         weightFieldName: userWeight,
         heightFieldName: userHeight,
         diseasesFieldName: userDiseases,
+        genderFieldName: userGender,
         goalFieldName: userGoal,
       });
     } catch (e) {
@@ -44,11 +46,14 @@ class FirebaseCloudStorage {
       // Check if we have any documents
       if (querySnapshot.docs.isNotEmpty) {
         // Extract the first document and convert it to CloudNote
-        return CloudUserDetails.fromSnapshot(querySnapshot.docs.first);
+        final userDoc = querySnapshot.docs.first;
+        return CloudUserDetails.fromSnapshot(userDoc);
       } else {
+        print('empty');
         throw CouldNotGetUserDetailsException();
       }
     } catch (e) {
+      print('e I/flutter ( 3949): type of type in type cast');
       throw CouldNotGetUserDetailsException();
     }
   }
@@ -59,6 +64,7 @@ class FirebaseCloudStorage {
     required int userWeight,
     required int userHeight,
     required List<String> userDiseases,
+    required String userGender,
     required String userGoal,
   }) async {
     await userdetails.add({
@@ -67,6 +73,7 @@ class FirebaseCloudStorage {
       weightFieldName: userWeight,
       heightFieldName: userHeight,
       diseasesFieldName: userDiseases,
+      genderFieldName: userGender,
       goalFieldName: userGoal,
     });
   }

@@ -4,3 +4,7 @@ const notesRoute = '/notes/';
 const verifyEmailRoute = '/verify-email/';
 const createOrUpdateNoteRoute = '/notes/new-note/';
 const userHomePageRoute = '/user-home-page/';
+const userRecipeQueryRoute = '/user-home-page/recipe-query/';
+const userUserIntakeRoute = '/user-home-page/user-intake-route/';
+const userFoodNutritionQueryRoute = '/user-home-page/food-nutrition-query/';
+const bmiCalculatorRoute = '/user-home-page/bmi-calculator/';

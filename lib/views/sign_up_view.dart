@@ -25,6 +25,7 @@ class _SignUpViewState extends State<SignUpView> {
   late final FirebaseCloudStorage _userDetailsService;
   bool _isPasswordVisible = false;
   String? _selectedGoal;
+  String? _selectedGender;
 
   // For multiselect
   final List<String> _listOfDiseases = ['Diabetes', 'High Blood Pressure'];
@@ -99,16 +100,43 @@ class _SignUpViewState extends State<SignUpView> {
               SizedBox(height: screenHeight * 0.03),
               _selectDiseases(),
               SizedBox(height: screenHeight * 0.03),
+              _selectYourGender(),
+              SizedBox(height: screenHeight * 0.03),
               _selectYourGoal(),
               SizedBox(height: screenHeight * 0.02),
               SizedBox(
                   width: double.infinity,
                   child: _signUpButton(context, screenWidth, screenHeight)),
+              SizedBox(height: screenHeight * 0.02),
+              _orDividerRow(),
               _loginButton(context),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Row _orDividerRow() {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 1,
+            color: Colors.grey.withOpacity(0.5),
+          ),
+        ),
+        const Text(
+          "  Or  ",
+          style: TextStyle(color: Colors.black, fontSize: 12),
+        ),
+        Expanded(
+          child: Container(
+            height: 1,
+            color: Colors.grey.withOpacity(0.5),
+          ),
+        ),
+      ],
     );
   }
 
@@ -121,7 +149,8 @@ class _SignUpViewState extends State<SignUpView> {
           if (_selectedDate == null ||
               _weight.text.isEmpty ||
               _height.text.isEmpty ||
-              _selectedGoal == null) {
+              _selectedGoal == null ||
+              _selectedGender == null) {
             throw EmptyFieldViewException('All fields must be filled');
           }
           AuthUser newUser = await AuthService.firebase().createUser(
@@ -134,6 +163,7 @@ class _SignUpViewState extends State<SignUpView> {
               userWeight: int.parse(_weight.text),
               userHeight: int.parse(_height.text),
               userDiseases: _selectedValues,
+              userGender: _selectedGender!,
               userGoal: _selectedGoal!);
           await AuthService.firebase().sendEmailVerification();
           if (context.mounted) {
@@ -207,8 +237,39 @@ class _SignUpViewState extends State<SignUpView> {
       onChanged: _onChanged,
       selectedValues: _selectedValues,
       // hint: const Text('data'),
-      whenEmpty: 'Select diseases (if applicable)',
+      whenEmpty: 'Diseases (if applicable)',
       decoration: const InputDecoration(),
+    );
+  }
+
+  Column _selectYourGender() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        DropdownButtonFormField<String>(
+          value: _selectedGender,
+          hint: const Text('Gender?'),
+          decoration: const InputDecoration(
+            labelText: 'Select your Gender',
+            border: OutlineInputBorder(),
+          ),
+          items: const [
+            DropdownMenuItem(
+              value: 'Male',
+              child: Text('Male'),
+            ),
+            DropdownMenuItem(
+              value: 'Female',
+              child: Text('Female'),
+            ),
+          ],
+          onChanged: (String? newValue) {
+            setState(() {
+              _selectedGender = newValue;
+            });
+          },
+        ),
+      ],
     );
   }
 
@@ -218,11 +279,10 @@ class _SignUpViewState extends State<SignUpView> {
       children: [
         DropdownButtonFormField<String>(
           value: _selectedGoal,
-          hint: const Text('What is your goal?'), // Initial hint text
+          hint: const Text('Goal?'),
           decoration: const InputDecoration(
-            labelText:
-                'Select your Goal', // Label that stays on top when an item is selected
-            border: OutlineInputBorder(), // Add a border around the dropdown
+            labelText: 'Select your Goal',
+            border: OutlineInputBorder(),
           ),
           items: const [
             DropdownMenuItem(
@@ -315,7 +375,7 @@ class _SignUpViewState extends State<SignUpView> {
       controller: _dateOfBirth,
       readOnly: true,
       decoration: InputDecoration(
-        hintText: 'Select your date of birth',
+        hintText: 'Date of birth',
         focusedBorder: const OutlineInputBorder(// Default border color
             ),
         prefixIcon: IconButton(
@@ -334,7 +394,8 @@ class _SignUpViewState extends State<SignUpView> {
       enableSuggestions: false,
       autocorrect: false,
       decoration: InputDecoration(
-        hintText: 'Enter your password here',
+        hintText: 'Password',
+        prefixIcon: const ImageIcon(AssetImage('assets/images/lock.png')),
         suffixIcon: IconButton(
           onPressed: () {
             setState(
@@ -357,8 +418,8 @@ class _SignUpViewState extends State<SignUpView> {
       autocorrect: false,
       keyboardType: TextInputType.emailAddress,
       decoration: const InputDecoration(
-        hintText: 'Enter your email here',
-      ),
+          hintText: 'Email',
+          prefixIcon: ImageIcon(AssetImage('assets/images/email.png'))),
     );
   }
 

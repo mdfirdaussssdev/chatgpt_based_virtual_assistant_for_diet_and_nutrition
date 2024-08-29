@@ -11,6 +11,7 @@ class CloudUserDetails {
   final int userWeight;
   final int userHeight;
   final List<String> userDiseases;
+  final String userGender;
   final String userGoal;
   const CloudUserDetails({
     required this.documentId,
@@ -19,16 +20,19 @@ class CloudUserDetails {
     required this.userWeight,
     required this.userHeight,
     required this.userDiseases,
+    required this.userGender,
     required this.userGoal,
   });
 
   CloudUserDetails.fromSnapshot(
       QueryDocumentSnapshot<Map<String, dynamic>> snapshot)
       : documentId = snapshot.id,
-        ownerUserId = snapshot.data()[ownerUserIdFieldName],
+        ownerUserId = snapshot.data()[ownerUserIdFieldName] as String,
         userDateOfBirth = (snapshot.data()[dobFieldName] as Timestamp).toDate(),
         userWeight = snapshot.data()[weightFieldName] as int,
         userHeight = snapshot.data()[heightFieldName] as int,
-        userDiseases = snapshot.data()[diseasesFieldName] as List<String>,
+        userDiseases =
+            List<String>.from(snapshot.data()[diseasesFieldName] ?? []),
+        userGender = snapshot.data()[genderFieldName] as String,
         userGoal = snapshot.data()[goalFieldName] as String;
 }
