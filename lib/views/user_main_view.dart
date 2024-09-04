@@ -1,4 +1,6 @@
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/constants/routes.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/models/eat_less_model.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/models/eat_more_model.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/models/user_actions_model.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/api/api_exceptions.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/api/fetch_quote.dart';
@@ -16,11 +18,15 @@ class UserMainView extends StatefulWidget {
 
 class _UserMainViewState extends State<UserMainView> {
   List<UserMainActionsModel> userMainActions = [];
+  List<EatMoreModel> eatMore = [];
+  List<EatLessModel> eatLess = [];
 
   String dailyQuote = '';
 
   void _getInitialInfo() {
     userMainActions = UserMainActionsModel.getUserMainActions();
+    eatMore = EatMoreModel.getEatMore();
+    eatLess = EatLessModel.getEatLess();
   }
 
   Future<void> _fetchQuote() async {
@@ -48,13 +54,21 @@ class _UserMainViewState extends State<UserMainView> {
 
     return Scaffold(
       appBar: appBar(context),
-      body: Column(
-        children: [
-          _userActionsSection(userMainActions),
-          SizedBox(height: screenHeight * 0.03),
-          _healthToolsSection(screenWidth, screenHeight, context),
-          _motivationalQuoteSection(screenWidth, dailyQuote),
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            _userActionsSection(userMainActions),
+            SizedBox(height: screenHeight * 0.03),
+            _healthToolsSection(screenWidth, screenHeight, context),
+            _eatMoreSectionHeader(screenWidth),
+            _eatMoreSectionDescription(screenWidth),
+            _eatMoreSection(eatMore),
+            _eatLessSectionHeader(screenWidth),
+            _eatLessSectionDescription(screenWidth),
+            _eatLessSection(eatLess),
+            _motivationalQuoteSection(screenWidth, dailyQuote),
+          ],
+        ),
       ),
     );
   }
@@ -92,7 +106,7 @@ Container _healthToolsSection(
     double screenWidth, double screenHeight, BuildContext context) {
   return Container(
     width: double.infinity,
-    color: Colors.blue.shade100,
+    color: Colors.orange.shade100,
     padding: EdgeInsets.all(screenWidth * 0.05),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -268,6 +282,172 @@ SizedBox _userActionsSection(List<UserMainActionsModel> userMainActions) {
                 ),
               ],
             ),
+          ),
+        );
+      },
+    ),
+  );
+}
+
+SizedBox _eatMoreSection(List<EatMoreModel> eatMore) {
+  return SizedBox(
+    height: 120,
+    child: ListView.separated(
+      itemCount: eatMore.length,
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      separatorBuilder: (context, index) => const SizedBox(width: 25),
+      itemBuilder: (context, index) {
+        return Container(
+          width: 100,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 50,
+                height: 50,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SvgPicture.asset(eatMore[index].iconPath),
+                ),
+              ),
+              const SizedBox(
+                  height: 8), // Add some space between the image and the text
+              Expanded(
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    eatMore[index].name,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w400,
+                      color: Colors.blue,
+                      fontSize: 14,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis, // Handle overflow
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    ),
+  );
+}
+
+Container _eatMoreSectionHeader(double screenWidth) {
+  return Container(
+    width: double.infinity,
+    padding: EdgeInsets.all(screenWidth * 0.025),
+    color: Colors.blue.shade100,
+    child: const Text(
+      'Eat More',
+      style: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: Colors.black,
+      ),
+      textAlign: TextAlign.center,
+    ),
+  );
+}
+
+Container _eatMoreSectionDescription(double screenWidth) {
+  return Container(
+    width: double.infinity,
+    padding: EdgeInsets.all(screenWidth * 0.025),
+    child: const Text(
+      'Boost your health by including these nutrient-rich foods in your daily meals.',
+      style: TextStyle(
+        fontSize: 14,
+        color: Colors.black,
+      ),
+      textAlign: TextAlign.center,
+    ),
+  );
+}
+
+Container _eatLessSectionHeader(double screenWidth) {
+  return Container(
+    width: double.infinity,
+    padding: EdgeInsets.all(screenWidth * 0.025),
+    color: Colors.blue.shade100,
+    child: const Text(
+      'Eat Less',
+      style: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: Colors.black,
+      ),
+      textAlign: TextAlign.center,
+    ),
+  );
+}
+
+Container _eatLessSectionDescription(double screenWidth) {
+  return Container(
+    width: double.infinity,
+    padding: EdgeInsets.all(screenWidth * 0.025),
+    child: const Text(
+      'Eating healthily doesn’t require giving up on enjoyable flavors. However, some foods can be detrimental, particularly when consumed in excess.',
+      style: TextStyle(
+        fontSize: 14,
+        color: Colors.black,
+      ),
+      textAlign: TextAlign.center,
+    ),
+  );
+}
+
+SizedBox _eatLessSection(List<EatLessModel> eatLess) {
+  return SizedBox(
+    height: 120,
+    child: ListView.separated(
+      itemCount: eatLess.length,
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      separatorBuilder: (context, index) => const SizedBox(width: 25),
+      itemBuilder: (context, index) {
+        return Container(
+          width: 100,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 50,
+                height: 50,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SvgPicture.asset(eatLess[index].iconPath),
+                ),
+              ),
+              const SizedBox(
+                  height: 8), // Add some space between the image and the text
+              Expanded(
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    eatLess[index].name,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w400,
+                      color: Colors.blue,
+                      fontSize: 14,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis, // Handle overflow
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },

@@ -3,9 +3,10 @@ import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/bmi_calculator_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/login_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/sign_up_view.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/user_food_nutrition_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/user_intake_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/user_main_view.dart';
-import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/verify_email_view_lol.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/verify_email_view.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -38,7 +39,7 @@ class MyApp extends StatelessWidget {
         signUpRoute: (context) => const SignUpView(),
         userHomePageRoute: (context) => const UserMainView(),
         // need to change this later
-        userFoodNutritionQueryRoute: (context) => const UserMainView(),
+        userFoodNutritionQueryRoute: (context) => const UserFoodNutritionView(),
         userUserIntakeRoute: (context) => UserIntakeView(),
         userRecipeQueryRoute: (context) => const UserMainView(),
         bmiCalculatorRoute: (context) => const BMICalculatorView(),
