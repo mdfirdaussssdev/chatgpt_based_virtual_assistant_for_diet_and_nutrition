@@ -80,6 +80,12 @@ class FirebaseAuthProvider implements AuthProvider {
   }
 
   @override
+  Future<AuthUser> logInWithGoogle() {
+    throw UnimplementedError(
+        'Google sign-in not implemented for firebase auth');
+  }
+
+  @override
   Future<void> logOut() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {

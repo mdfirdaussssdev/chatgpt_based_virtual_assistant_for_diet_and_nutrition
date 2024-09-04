@@ -53,6 +53,12 @@ class _LoginViewState extends State<LoginView> {
               ),
               SizedBox(height: screenHeight * 0.02),
               _orDividerRow(),
+              SizedBox(height: screenHeight * 0.02),
+              SizedBox(
+                child:
+                    _loginButtonWithGoogle(context, screenHeight, screenWidth),
+              ),
+              SizedBox(height: screenHeight * 0.02),
               _signUpButton(context)
             ],
           ),
@@ -162,6 +168,46 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
+  Container _loginButtonWithGoogle(
+      BuildContext context, screenHeight, screenWidth) {
+    return Container(
+      decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 235, 235, 235),
+          border: Border.all(
+              color: const Color.fromARGB(255, 210, 210, 210), width: 2.0),
+          borderRadius: BorderRadius.circular(20.0)),
+      child: IconButton(
+        icon: Image.asset(
+          'assets/images/google_icon.png',
+          height: screenHeight * 0.06,
+        ),
+        onPressed: () async {
+          try {
+            await AuthService.google().logInWithGoogle();
+            final user = AuthService.firebase().currentUser;
+            if (user != null) {
+              if (context.mounted) {
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  userHomePageRoute,
+                  (route) => false,
+                );
+              }
+            } else {
+              throw GenericAuthException();
+            }
+          } on GenericAuthException {
+            if (context.mounted) {
+              await showErrorDialog(
+                context,
+                'Authentication error',
+              );
+            }
+          }
+        },
+      ),
+    );
+  }
+
   TextField _emailAddressField() {
     return TextField(
       controller: _email,
@@ -197,7 +243,7 @@ class _LoginViewState extends State<LoginView> {
           ),
         ),
         const Text(
-          "  Or  ",
+          "  Or continue with  ",
           style: TextStyle(color: Colors.black, fontSize: 12),
         ),
         Expanded(

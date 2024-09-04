@@ -49,11 +49,9 @@ class FirebaseCloudStorage {
         final userDoc = querySnapshot.docs.first;
         return CloudUserDetails.fromSnapshot(userDoc);
       } else {
-        print('empty');
         throw CouldNotGetUserDetailsException();
       }
     } catch (e) {
-      print('e I/flutter ( 3949): type of type in type cast');
       throw CouldNotGetUserDetailsException();
     }
   }

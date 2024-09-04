@@ -7,6 +7,7 @@ abstract class AuthProvider {
     required String id,
     required String password,
   });
+  Future<AuthUser> logInWithGoogle();
   Future<AuthUser> createUser({
     required String id,
     required String password,

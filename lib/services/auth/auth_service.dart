@@ -1,12 +1,14 @@
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/auth/auth_provider.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/auth/auth_user.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/auth/firebase_auth_provider.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/auth/google_auth_provider.dart';
 
 class AuthService implements AuthProvider {
   final AuthProvider provider;
   const AuthService(this.provider);
 
   factory AuthService.firebase() => AuthService(FirebaseAuthProvider());
+  factory AuthService.google() => AuthService(GoogleAuthProvider());
 
   @override
   Future<AuthUser> createUser({
@@ -27,6 +29,11 @@ class AuthService implements AuthProvider {
     required String password,
   }) =>
       provider.logIn(id: id, password: password);
+
+  @override
+  Future<AuthUser> logInWithGoogle() async {
+    return provider.logInWithGoogle();
+  }
 
   @override
   Future<void> logOut() => provider.logOut();
