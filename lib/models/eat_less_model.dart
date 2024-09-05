@@ -13,28 +13,28 @@ class EatLessModel {
     eatLess.add(
       EatLessModel(
         name: 'Sugar',
-        iconPath: 'assets/images/recipe.svg',
+        iconPath: 'assets/images/sugar.png',
       ),
     );
 
     eatLess.add(
       EatLessModel(
         name: 'Salt & Sodium',
-        iconPath: 'assets/images/intake.svg',
+        iconPath: 'assets/images/salt.png',
       ),
     );
 
     eatLess.add(
       EatLessModel(
         name: 'Excess Calories',
-        iconPath: 'assets/images/nutrition.svg',
+        iconPath: 'assets/images/unhealthy.png',
       ),
     );
 
     eatLess.add(
       EatLessModel(
         name: 'Trans & Saturated Fats',
-        iconPath: 'assets/images/nutrition.svg',
+        iconPath: 'assets/images/fats.png',
       ),
     );
 

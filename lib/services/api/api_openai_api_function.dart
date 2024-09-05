@@ -1,9 +1,9 @@
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/api/ap_openai_api_prompts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-const String openAiApiKey =
-    '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';
+final String? openAiApiKey = dotenv.env['OPENAI_API_KEY'];
 
 Future<String> getCaloriesFromOpenAI(String food) async {
   final url = Uri.parse('https://api.openai.com/v1/chat/completions');

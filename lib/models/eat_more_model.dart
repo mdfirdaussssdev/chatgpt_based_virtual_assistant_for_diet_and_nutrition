@@ -13,28 +13,28 @@ class EatMoreModel {
     eatMore.add(
       EatMoreModel(
         name: 'Protein (Meat & Others)',
-        iconPath: 'assets/images/recipe.svg',
+        iconPath: 'assets/images/protein.png',
       ),
     );
 
     eatMore.add(
       EatMoreModel(
         name: 'Healthier Oils & Fats',
-        iconPath: 'assets/images/intake.svg',
+        iconPath: 'assets/images/oil.png',
       ),
     );
 
     eatMore.add(
       EatMoreModel(
         name: 'Wholegrains',
-        iconPath: 'assets/images/nutrition.svg',
+        iconPath: 'assets/images/bread.png',
       ),
     );
 
     eatMore.add(
       EatMoreModel(
         name: 'Fruit & Vegetables',
-        iconPath: 'assets/images/nutrition.svg',
+        iconPath: 'assets/images/vegetables.png',
       ),
     );
 

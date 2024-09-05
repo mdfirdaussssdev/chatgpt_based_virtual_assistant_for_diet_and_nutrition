@@ -8,8 +8,16 @@ import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/use
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/user_main_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/verify_email_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await dotenv.load(fileName: ".env");
+    print('Environment variables loaded successfully');
+  } catch (e) {
+    print('Failed to load environment variables: $e');
+  }
   runApp(const MyApp());
 }
 
