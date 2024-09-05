@@ -1,6 +1,9 @@
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/models/eat_less_model.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/models/eat_more_model.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/api/api_openai_api_function.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/auth/auth_service.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_storage_exceptions.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/firebase_cloud_storage.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/utilities/dialogs/error_dialog.dart';
 import 'package:flutter/material.dart';
 
@@ -17,6 +20,8 @@ class _UserFoodNutritionViewState extends State<UserFoodNutritionView> {
   List<EatMoreModel> eatMore = [];
   List<EatLessModel> eatLess = [];
   String _result = '';
+  late final FirebaseCloudStorage _userFoodNutritionQueryService;
+  bool _isLoading = false;
 
   void _getInitialInfo() {
     eatMore = EatMoreModel.getEatMore();
@@ -28,7 +33,33 @@ class _UserFoodNutritionViewState extends State<UserFoodNutritionView> {
     _foodName = TextEditingController();
     _servingCount = TextEditingController();
     _getInitialInfo();
+    _userFoodNutritionQueryService = FirebaseCloudStorage();
     super.initState();
+    _initializeResult();
+  }
+
+  Future<void> _initializeResult() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      final userDoc =
+          await _userFoodNutritionQueryService.getUserFoodNutritionQueryDetails(
+        ownerUserId: AuthService.firebase().currentUser!.id,
+      );
+      setState(() {
+        _result = userDoc.foodNutritionQueryResult;
+      });
+    } on CouldNotGetFoodNutritionQueryException {
+      // No result found, leave _result as an empty string
+      setState(() {
+        _result = '';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false; // Set loading to false when done
+      });
+    }
   }
 
   @override
@@ -42,6 +73,10 @@ class _UserFoodNutritionViewState extends State<UserFoodNutritionView> {
     final food = _foodName.text;
     const servings = 1;
 
+    setState(() {
+      _isLoading = true; // Set loading to true
+    });
+
     final result = await getFoodNutritionFromOpenAI(food, servings);
 
     setState(() {
@@ -49,7 +84,13 @@ class _UserFoodNutritionViewState extends State<UserFoodNutritionView> {
       if (_result ==
           "Unable to query input, error! Please enter a proper food name.") {
         showErrorDialog(context, 'Please enter a proper food name!');
+        _initializeResult();
+      } else {
+        _userFoodNutritionQueryService.createNewUserFoodNutritionQuery(
+            ownerUserId: AuthService.firebase().currentUser!.id,
+            foodNutritionQueryResult: result);
       }
+      _isLoading = false;
     });
   }
 
@@ -60,27 +101,40 @@ class _UserFoodNutritionViewState extends State<UserFoodNutritionView> {
 
     return Scaffold(
       appBar: appBar(context),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _eatMoreSectionHeader(screenWidth),
-            _eatMoreSectionDescription(screenWidth),
-            _eatMoreSection(eatMore),
-            SizedBox(height: screenHeight * 0.01),
-            _eatLessSectionHeader(screenWidth),
-            _eatLessSectionDescription(screenWidth),
-            _eatLessSection(eatLess),
-            SizedBox(height: screenHeight * 0.01),
-            _queryFoodNutritionHeader(screenWidth),
-            SizedBox(height: screenHeight * 0.02),
-            SizedBox(
-              width: screenWidth * 0.8,
-              child: _foodNameField(),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                _eatMoreSectionHeader(screenWidth),
+                _eatMoreSectionDescription(screenWidth),
+                _eatMoreSection(eatMore),
+                SizedBox(height: screenHeight * 0.01),
+                _eatLessSectionHeader(screenWidth),
+                _eatLessSectionDescription(screenWidth),
+                _eatLessSection(eatLess),
+                SizedBox(height: screenHeight * 0.01),
+                _queryFoodNutritionHeader(screenWidth),
+                SizedBox(height: screenHeight * 0.02),
+                SizedBox(
+                  width: screenWidth * 0.8,
+                  child: _foodNameField(),
+                ),
+                _buildResultDisplay(),
+                SizedBox(height: screenHeight * 0.02),
+              ],
             ),
-            _buildResultDisplay(),
-            SizedBox(height: screenHeight * 0.02),
-          ],
-        ),
+          ),
+          if (_isLoading) // Show loading indicator overlay
+            Positioned.fill(
+              child: Container(
+                color: Colors.black54, // Semi-transparent background
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
