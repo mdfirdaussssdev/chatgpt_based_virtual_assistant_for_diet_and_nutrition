@@ -175,14 +175,18 @@ class _UserFoodNutritionViewState extends State<UserFoodNutritionView> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Text(
-              healthyOrUnhealthy,
+              healthyOrUnhealthy.trim().toLowerCase() == 'healthy'
+                  ? 'Healthy'
+                  : healthyOrUnhealthy.trim().toLowerCase() == 'unhealthy'
+                      ? 'Unhealthy'
+                      : healthyOrUnhealthy,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: healthyOrUnhealthy == 'Healthy'
+                color: healthyOrUnhealthy.trim().toLowerCase() == 'healthy'
                     ? Colors.green
-                    : healthyOrUnhealthy == 'Unhealthy'
+                    : healthyOrUnhealthy.trim().toLowerCase() == 'unhealthy'
                         ? Colors.red
                         : Colors.black,
               ),

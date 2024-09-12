@@ -1,7 +1,7 @@
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/constants/routes.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/models/user_actions_model.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/api/api_exceptions.dart';
-import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/api/fetch_quote.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/api/api_fetch_quote.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/auth/auth_service.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/utilities/dialogs/logout_dialog.dart';
 import 'package:flutter/material.dart';

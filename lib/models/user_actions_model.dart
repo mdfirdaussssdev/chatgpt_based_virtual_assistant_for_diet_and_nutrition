@@ -19,10 +19,10 @@ class UserMainActionsModel {
 
     userMainActions.add(
       UserMainActionsModel(
-        name: 'Recipe Query',
+        name: 'Discover Recipes',
         iconPath: 'assets/images/recipe.svg',
         boxColor: const Color(0xff9DCEFF),
-        routeName: userRecipeQueryRoute,
+        routeName: userDiscoverRecipesRoute,
       ),
     );
 

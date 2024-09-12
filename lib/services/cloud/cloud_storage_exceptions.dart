@@ -2,6 +2,7 @@ class CloudStorageExceptions implements Exception {
   const CloudStorageExceptions();
 }
 
+// For userDetails
 // Create Part CRUD
 class CouldNotCreateUserDetailsException extends CloudStorageExceptions {}
 
@@ -14,6 +15,7 @@ class CouldNotUpdateUserDetailsException extends CloudStorageExceptions {}
 // Delete Part CRUD
 class CouldNotDeleteUserDetailsException extends CloudStorageExceptions {}
 
+// For foodNutritionQuery
 class FoodNutritionQueryAlreadyExistsException extends CloudStorageExceptions {}
 
 class CouldNotGetFoodNutritionQueryException extends CloudStorageExceptions {}
@@ -23,3 +25,10 @@ class CouldNotUpdateFoodNutritionQueryException
 
 class CouldNotDeleteFoodNutritionQueryException
     extends CloudStorageExceptions {}
+
+// For foodRecipeQuery
+class CouldNotGetFoodRecipeQueryException extends CloudStorageExceptions {}
+
+class CouldNotUpdateFoodRecipeQueryException extends CloudStorageExceptions {}
+
+class CouldNotDeleteFoodRecipeQueryException extends CloudStorageExceptions {}

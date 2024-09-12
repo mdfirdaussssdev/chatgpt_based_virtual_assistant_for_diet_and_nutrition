@@ -1,7 +1,8 @@
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_storage_constants.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_storage_exceptions.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_user_details.dart';
-import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/user_latest_food_nutrition_query.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_user_latest_food_nutrition_query.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_user_latest_food_recipe_query.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirebaseCloudStorage {
@@ -10,6 +11,11 @@ class FirebaseCloudStorage {
 
   final userLatestFoodNutritionQuery =
       FirebaseFirestore.instance.collection('userLatestFoodNutritionQuery');
+
+  final userLatestFoodRecipeQuery =
+      FirebaseFirestore.instance.collection('userLatestFoodRecipeQuery');
+
+// For userDetails
 
   Future<void> deleteUserDetails({required String documentId}) async {
     try {
@@ -69,23 +75,29 @@ class FirebaseCloudStorage {
     required String userGender,
     required String userGoal,
   }) async {
-    await userDetails.add({
-      ownerUserIdFieldName: ownerUserId,
-      dobFieldName: userDateOfBirth,
-      weightFieldName: userWeight,
-      heightFieldName: userHeight,
-      diseasesFieldName: userDiseases,
-      genderFieldName: userGender,
-      goalFieldName: userGoal,
-    });
+    try {
+      await userDetails.add({
+        ownerUserIdFieldName: ownerUserId,
+        dobFieldName: userDateOfBirth,
+        weightFieldName: userWeight,
+        heightFieldName: userHeight,
+        diseasesFieldName: userDiseases,
+        genderFieldName: userGender,
+        goalFieldName: userGoal,
+      });
+    } catch (e) {
+      throw CouldNotCreateUserDetailsException();
+    }
   }
+
+// For userLatestFoodNutritionQuery
 
   Future<void> deleteUserFoodNutritionQuery(
       {required String documentId}) async {
     try {
       await userLatestFoodNutritionQuery.doc(documentId).delete();
     } catch (e) {
-      throw CouldNotDeleteUserDetailsException();
+      throw CouldNotDeleteFoodNutritionQueryException();
     }
   }
 
@@ -137,6 +149,98 @@ class FirebaseCloudStorage {
       await userLatestFoodNutritionQuery.add({
         ownerUserIdFieldName: ownerUserId,
         foodNutritionQueryResultFieldName: foodNutritionQueryResult
+      });
+    }
+  }
+
+// For userLatestFoodRecipeQuery
+  Future<void> deleteUserFoodRecipeQuery({required String documentId}) async {
+    try {
+      await userLatestFoodRecipeQuery.doc(documentId).delete();
+    } catch (e) {
+      throw CouldNotDeleteFoodRecipeQueryException();
+    }
+  }
+
+  Future<void> updateUserFoodRecipeQuery({
+    required String documentId,
+    required String imageUrl,
+    required String title,
+    required String reason,
+    required List<String> ingredients,
+    required List<String> instructions,
+    required List<bool> checkedIngredients,
+    required List<bool> checkedInstructions,
+  }) async {
+    try {
+      await userLatestFoodRecipeQuery.doc(documentId).update({
+        foodRecipeImageUrlFieldName: imageUrl,
+        foodRecipeTitleFieldName: title,
+        foodRecipeReasonFieldName: reason,
+        foodRecipeIngredientsFieldName: ingredients,
+        foodRecipeInstructionsFieldName: instructions,
+        foodRecipeCheckedIngredientsFieldName: checkedIngredients,
+        foodRecipeCheckedInstructionsFieldName: checkedInstructions,
+      });
+    } catch (e) {
+      throw CouldNotUpdateFoodRecipeQueryException();
+    }
+  }
+
+  Future<CloudUserLatestFoodRecipeQuery> getUserFoodRecipeQueryDetails({
+    required String ownerUserId,
+  }) async {
+    try {
+      final querySnapshot = await userLatestFoodRecipeQuery
+          .where(ownerUserIdFieldName, isEqualTo: ownerUserId)
+          .get();
+      // Check if we have any documents
+      if (querySnapshot.docs.isNotEmpty) {
+        // Extract the first document and convert it to CloudLatestFoodRecipeQuery
+        final userDoc = querySnapshot.docs.first;
+        return CloudUserLatestFoodRecipeQuery.fromSnapshot(userDoc);
+      } else {
+        throw CouldNotGetFoodRecipeQueryException();
+      }
+    } catch (e) {
+      throw CouldNotGetFoodRecipeQueryException();
+    }
+  }
+
+  Future<void> createNewUserFoodRecipeQuery({
+    required String ownerUserId,
+    required String imageUrl,
+    required String title,
+    required String reason,
+    required List<String> ingredients,
+    required List<String> instructions,
+    required List<bool> checkedIngredients,
+    required List<bool> checkedInstructions,
+  }) async {
+    try {
+      final userDoc = await getUserFoodRecipeQueryDetails(
+        ownerUserId: ownerUserId,
+      );
+      updateUserFoodRecipeQuery(
+        documentId: userDoc.documentId,
+        imageUrl: imageUrl,
+        title: title,
+        reason: reason,
+        ingredients: ingredients,
+        instructions: instructions,
+        checkedIngredients: checkedIngredients,
+        checkedInstructions: checkedInstructions,
+      );
+    } on CouldNotGetFoodRecipeQueryException {
+      await userLatestFoodRecipeQuery.add({
+        ownerUserIdFieldName: ownerUserId,
+        foodRecipeImageUrlFieldName: imageUrl,
+        foodRecipeTitleFieldName: title,
+        foodRecipeReasonFieldName: reason,
+        foodRecipeIngredientsFieldName: ingredients,
+        foodRecipeInstructionsFieldName: instructions,
+        foodRecipeCheckedIngredientsFieldName: checkedIngredients,
+        foodRecipeCheckedInstructionsFieldName: checkedInstructions,
       });
     }
   }

@@ -1,4 +1,4 @@
-import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/api/ap_openai_api_prompts.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/api/api_openai_api_prompts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -36,6 +36,62 @@ Future<String> getCaloriesFromOpenAI(String food) async {
     print('Error: ${response.statusCode} - ${response.reasonPhrase}');
     print('Response Body: ${response.body}');
     throw Exception('Failed to get calorie info');
+  }
+}
+
+Future<String> getRecipeFromOpenAI(String recipeTitle, String userGoal) async {
+  final url = Uri.parse('https://api.openai.com/v1/chat/completions');
+
+  final response = await http.post(
+    url,
+    headers: {
+      'Authorization': 'Bearer $openAiApiKey',
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({
+      'model': 'gpt-4o-mini',
+      'messages': [
+        {'role': 'system', 'content': 'You are a helpful assistant.'},
+        {'role': 'user', 'content': getRecipeQueryPrompt(recipeTitle, userGoal)}
+      ],
+      'max_tokens': 500,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    final content = data['choices'][0]['message']['content'];
+    return content?.toString() ?? 'No content received';
+  } else {
+    return 'Failed to get a response from the API.';
+  }
+}
+
+Future<String> getRandomRecipeFoodName(String region, String userGoal) async {
+  final url = Uri.parse('https://api.openai.com/v1/chat/completions');
+
+  final response = await http.post(
+    url,
+    headers: {
+      'Authorization': 'Bearer $openAiApiKey',
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({
+      'model': 'gpt-4o-mini',
+      'messages': [
+        {'role': 'system', 'content': 'You are a helpful assistant.'},
+        {'role': 'user', 'content': getRandomRecipePrompt(region, userGoal)}
+      ],
+      'max_tokens': 80,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    final content = data['choices'][0]['message']['content'];
+    return content?.toString() ?? 'No content received';
+  } else {
+    return 'Failed to get a response from the API.';
   }
 }
 

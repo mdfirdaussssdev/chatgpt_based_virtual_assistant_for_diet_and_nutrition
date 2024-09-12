@@ -6,4 +6,14 @@ const dobFieldName = 'date_of_birth';
 const goalFieldName = 'goal';
 const genderFieldName = 'gender';
 
+// For foodNutritionQuery
 const foodNutritionQueryResultFieldName = 'food_nutrition_query_result';
+
+// For foodRecipeQuery
+const foodRecipeImageUrlFieldName = 'image_url';
+const foodRecipeTitleFieldName = 'title';
+const foodRecipeReasonFieldName = 'reason';
+const foodRecipeIngredientsFieldName = 'ingredients';
+const foodRecipeInstructionsFieldName = 'instructions';
+const foodRecipeCheckedIngredientsFieldName = 'checked_ingredients';
+const foodRecipeCheckedInstructionsFieldName = 'checked_instructions';
