@@ -1,6 +1,8 @@
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/constants/routes.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/auth/auth_exceptions.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/auth/auth_service.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_storage_exceptions.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/firebase_cloud_storage.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/utilities/dialogs/error_dialog.dart';
 import 'package:flutter/material.dart';
 // import 'dart:developer' as devtools show log;
@@ -15,12 +17,14 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   late final TextEditingController _email;
   late final TextEditingController _password;
+  late final FirebaseCloudStorage _userDetailsService;
   bool _isPasswordVisible = false;
 
   @override
   void initState() {
     _email = TextEditingController();
     _password = TextEditingController();
+    _userDetailsService = FirebaseCloudStorage();
     super.initState();
   }
 
@@ -186,6 +190,7 @@ class _LoginViewState extends State<LoginView> {
             await AuthService.google().logInWithGoogle();
             final user = AuthService.firebase().currentUser;
             if (user != null) {
+              await _userDetailsService.getUserDetails(ownerUserId: user.id);
               if (context.mounted) {
                 Navigator.of(context).pushNamedAndRemoveUntil(
                   userHomePageRoute,
@@ -194,6 +199,13 @@ class _LoginViewState extends State<LoginView> {
               }
             } else {
               throw GenericAuthException();
+            }
+          } on CouldNotGetUserDetailsException {
+            if (context.mounted) {
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                userGoogleFirstTimeLoginRoute,
+                (route) => false,
+              );
             }
           } on GenericAuthException {
             if (context.mounted) {
