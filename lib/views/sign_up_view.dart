@@ -26,9 +26,32 @@ class _SignUpViewState extends State<SignUpView> {
   bool _isPasswordVisible = false;
   String? _selectedGoal;
   String? _selectedGender;
+  String? _selectedActivityLevel;
+  String? _activityLevelExplanation;
+  final List<String> _activityLevels = [
+    'Sedentary',
+    'Lightly Active',
+    'Moderately Active',
+    'Very Active',
+    'Super Active',
+  ];
+
+  final List<String> _genders = [
+    'Male',
+    'Female',
+  ];
+
+  final List<String> _goals = [
+    'Gain Weight',
+    'Lose Weight',
+    'Maintain Weight',
+  ];
 
   // For multiselect
-  final List<String> _listOfDiseases = ['Diabetes', 'High Blood Pressure'];
+  final List<String> _listOfDiseases = [
+    'Diabetes',
+    'High Blood Pressure',
+  ];
   List<String> _selectedValues = [];
   void _onChanged(List<String> selectedValues) {
     setState(() {
@@ -79,6 +102,25 @@ class _SignUpViewState extends State<SignUpView> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    // Determine the explanation based on the selected activity level
+    if (_selectedActivityLevel != null) {
+      if (_selectedActivityLevel == 'Sedentary') {
+        _activityLevelExplanation =
+            'Sedentary (little to no exercise)\nExample: Primarily sitting throughout the day with minimal movement.';
+      } else if (_selectedActivityLevel == 'Lightly Active') {
+        _activityLevelExplanation =
+            'Lightly Active (light exercise or sports 1-3 days a week)\nExample: Walking, light jogging, or casual sports activities.';
+      } else if (_selectedActivityLevel == 'Moderately Active') {
+        _activityLevelExplanation =
+            'Moderately Active (moderate exercise/sports 3-5 days a week)\nExample: Regular exercise or physical activity like brisk walking, cycling, or going to the gym a few times a week.';
+      } else if (_selectedActivityLevel == 'Very Active') {
+        _activityLevelExplanation =
+            'Very Active (hard exercise/sports 6-7 days a week)\nExample: Daily intense exercise, such as weight training, running, or playing sports.';
+      } else if (_selectedActivityLevel == 'Super Active') {
+        _activityLevelExplanation =
+            'Super Active (very hard exercise, physical job, or training twice a day)\nExample: Intense daily training or those with very physically demanding jobs, like construction workers or athletes.';
+      }
+    }
 
     return Scaffold(
       appBar: appBar(context),
@@ -103,6 +145,8 @@ class _SignUpViewState extends State<SignUpView> {
               _selectYourGender(),
               SizedBox(height: screenHeight * 0.03),
               _selectYourGoal(),
+              SizedBox(height: screenHeight * 0.02),
+              _selectYourActivityLevel(),
               SizedBox(height: screenHeight * 0.02),
               SizedBox(
                   width: double.infinity,
@@ -158,13 +202,15 @@ class _SignUpViewState extends State<SignUpView> {
             password: password,
           );
           await _userDetailsService.createNewUserDetails(
-              ownerUserId: newUser.id,
-              userDateOfBirth: _selectedDate!,
-              userWeight: int.parse(_weight.text),
-              userHeight: int.parse(_height.text),
-              userDiseases: _selectedValues,
-              userGender: _selectedGender!,
-              userGoal: _selectedGoal!);
+            ownerUserId: newUser.id,
+            userDateOfBirth: _selectedDate!,
+            userWeight: int.parse(_weight.text),
+            userHeight: int.parse(_height.text),
+            userDiseases: _selectedValues,
+            userGender: _selectedGender!,
+            userGoal: _selectedGoal!,
+            userActivityLevel: _selectedActivityLevel!,
+          );
           await AuthService.firebase().sendEmailVerification();
           if (context.mounted) {
             Navigator.of(context).pushNamed(verifyEmailRoute);
@@ -248,21 +294,19 @@ class _SignUpViewState extends State<SignUpView> {
       children: [
         DropdownButtonFormField<String>(
           value: _selectedGender,
-          hint: const Text('Gender?'),
+          hint: const Text(
+            'Gender?',
+          ),
           decoration: const InputDecoration(
             labelText: 'Select your Gender',
             border: OutlineInputBorder(),
           ),
-          items: const [
-            DropdownMenuItem(
-              value: 'Male',
-              child: Text('Male'),
-            ),
-            DropdownMenuItem(
-              value: 'Female',
-              child: Text('Female'),
-            ),
-          ],
+          items: _genders.map((String gender) {
+            return DropdownMenuItem<String>(
+              value: gender,
+              child: Text(gender),
+            );
+          }).toList(),
           onChanged: (String? newValue) {
             setState(() {
               _selectedGender = newValue;
@@ -284,22 +328,53 @@ class _SignUpViewState extends State<SignUpView> {
             labelText: 'Select your Goal',
             border: OutlineInputBorder(),
           ),
-          items: const [
-            DropdownMenuItem(
-              value: 'Gain Weight',
-              child: Text('Gain Weight'),
-            ),
-            DropdownMenuItem(
-              value: 'Lose Weight',
-              child: Text('Lose Weight'),
-            ),
-          ],
+          items: _goals.map((String goal) {
+            return DropdownMenuItem<String>(
+              value: goal,
+              child: Text(goal),
+            );
+          }).toList(),
           onChanged: (String? newValue) {
             setState(() {
               _selectedGoal = newValue;
             });
           },
         ),
+      ],
+    );
+  }
+
+  Column _selectYourActivityLevel() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        DropdownButtonFormField<String>(
+          value: _selectedActivityLevel,
+          hint: const Text(
+            'Activity Level?',
+          ),
+          decoration: const InputDecoration(
+            labelText: 'Select your Activity Level',
+            border: OutlineInputBorder(),
+          ),
+          items: _activityLevels.map((String level) {
+            return DropdownMenuItem<String>(
+              value: level,
+              child: Text(level),
+            );
+          }).toList(),
+          onChanged: (String? newValue) {
+            setState(() {
+              _selectedActivityLevel = newValue;
+            });
+          },
+        ),
+        const SizedBox(height: 10),
+        if (_activityLevelExplanation != null)
+          Text(
+            _activityLevelExplanation!,
+            style: const TextStyle(fontSize: 14),
+          ),
       ],
     );
   }

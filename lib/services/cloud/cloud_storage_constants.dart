@@ -5,6 +5,7 @@ const diseasesFieldName = 'diseases';
 const dobFieldName = 'date_of_birth';
 const goalFieldName = 'goal';
 const genderFieldName = 'gender';
+const activityLevelFieldName = 'activity_level';
 
 // For foodNutritionQuery
 const foodNutritionQueryResultFieldName = 'food_nutrition_query_result';

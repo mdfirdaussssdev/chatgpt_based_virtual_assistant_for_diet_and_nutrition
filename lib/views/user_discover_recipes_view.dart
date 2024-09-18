@@ -79,7 +79,7 @@ class _UserDiscoverRecipesViewState extends State<UserDiscoverRecipesView> {
       final CloudUserDetails userDetails =
           await _firebaseCloudService.getUserDetails(ownerUserId: userId);
       setState(() {
-        // Gain Weight || Lose Weight
+        // Gain Weight || Lose Weight || Maintain Weight
         userGoal = userDetails.userGoal;
       });
     } catch (e) {

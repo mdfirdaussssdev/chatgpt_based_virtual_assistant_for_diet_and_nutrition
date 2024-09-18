@@ -33,6 +33,7 @@ class FirebaseCloudStorage {
     required List<String> userDiseases,
     required String userGender,
     required String userGoal,
+    required String userActivityLevel,
   }) async {
     try {
       await userDetails.doc(documentId).update({
@@ -42,6 +43,7 @@ class FirebaseCloudStorage {
         diseasesFieldName: userDiseases,
         genderFieldName: userGender,
         goalFieldName: userGoal,
+        activityLevelFieldName: userActivityLevel,
       });
     } catch (e) {
       throw CouldNotUpdateUserDetailsException();
@@ -74,6 +76,7 @@ class FirebaseCloudStorage {
     required List<String> userDiseases,
     required String userGender,
     required String userGoal,
+    required String userActivityLevel,
   }) async {
     try {
       await userDetails.add({
@@ -84,6 +87,7 @@ class FirebaseCloudStorage {
         diseasesFieldName: userDiseases,
         genderFieldName: userGender,
         goalFieldName: userGoal,
+        activityLevelFieldName: userActivityLevel,
       });
     } catch (e) {
       throw CouldNotCreateUserDetailsException();

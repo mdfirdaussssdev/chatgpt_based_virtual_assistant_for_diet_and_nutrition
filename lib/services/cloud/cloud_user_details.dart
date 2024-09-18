@@ -13,6 +13,7 @@ class CloudUserDetails {
   final List<String> userDiseases;
   final String userGender;
   final String userGoal;
+  final String userActivityLevel;
   const CloudUserDetails({
     required this.documentId,
     required this.ownerUserId,
@@ -22,6 +23,7 @@ class CloudUserDetails {
     required this.userDiseases,
     required this.userGender,
     required this.userGoal,
+    required this.userActivityLevel,
   });
 
   CloudUserDetails.fromSnapshot(
@@ -34,5 +36,6 @@ class CloudUserDetails {
         userDiseases =
             List<String>.from(snapshot.data()[diseasesFieldName] ?? []),
         userGender = snapshot.data()[genderFieldName] as String,
-        userGoal = snapshot.data()[goalFieldName] as String;
+        userGoal = snapshot.data()[goalFieldName] as String,
+        userActivityLevel = snapshot.data()[activityLevelFieldName] as String;
 }
