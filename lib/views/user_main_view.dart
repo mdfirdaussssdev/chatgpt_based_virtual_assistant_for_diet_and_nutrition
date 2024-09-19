@@ -3,6 +3,8 @@ import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/models/us
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/api/api_exceptions.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/api/api_fetch_quote.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/auth/auth_service.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_storage_exceptions.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/firebase_cloud_storage.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/utilities/dialogs/logout_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -16,6 +18,7 @@ class UserMainView extends StatefulWidget {
 
 class _UserMainViewState extends State<UserMainView> {
   List<UserMainActionsModel> userMainActions = [];
+  late final FirebaseCloudStorage _userDetailsService;
 
   String dailyQuote = '';
 
@@ -23,28 +26,44 @@ class _UserMainViewState extends State<UserMainView> {
     userMainActions = UserMainActionsModel.getUserMainActions();
   }
 
-  Future<void> _fetchQuote() async {
+  Future<void> _fetchDetails() async {
     try {
-      final quote = await fetchQuote(); // Example async call
-      setState(() {
-        dailyQuote = quote;
-      });
-    } catch (e) {
-      throw ApiExceptions();
+      final userId = AuthService.firebase().currentUser?.id;
+      if (userId == null) {
+        throw Exception("User ID is null");
+      }
+      await _userDetailsService.getUserDetails(ownerUserId: userId);
+      if (!mounted) return;
+      // Fetch Quote
+      try {
+        final quote = await fetchQuote(); // Example async call
+        setState(() {
+          dailyQuote = quote;
+        });
+      } catch (e) {
+        throw ApiExceptions();
+      }
+      if (!mounted) return;
+    } on CouldNotGetUserDetailsException {
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        userNoUserDetailsRoute,
+        (route) => false,
+      );
     }
   }
 
   @override
   void initState() {
     super.initState();
+    _userDetailsService = FirebaseCloudStorage();
     _getInitialInfo();
-    _fetchQuote();
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    _fetchDetails();
 
     return Scaffold(
       appBar: appBar(context),

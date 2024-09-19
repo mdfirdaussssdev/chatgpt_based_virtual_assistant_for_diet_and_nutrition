@@ -8,15 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:multiselect/multiselect.dart';
 
-class UserGoogleFirstLoginView extends StatefulWidget {
-  const UserGoogleFirstLoginView({super.key});
+class UserNoUserDetailsView extends StatefulWidget {
+  const UserNoUserDetailsView({super.key});
 
   @override
-  State<UserGoogleFirstLoginView> createState() =>
-      _UserGoogleFirstLoginViewState();
+  State<UserNoUserDetailsView> createState() => _UserNoUserDetailsViewState();
 }
 
-class _UserGoogleFirstLoginViewState extends State<UserGoogleFirstLoginView> {
+class _UserNoUserDetailsViewState extends State<UserNoUserDetailsView> {
   late final TextEditingController _dateOfBirth;
   late final TextEditingController _weight;
   late final TextEditingController _height;
@@ -403,7 +402,8 @@ class _UserGoogleFirstLoginViewState extends State<UserGoogleFirstLoginView> {
       ),
       centerTitle: true,
       leading: IconButton(
-        onPressed: () {
+        onPressed: () async {
+          await AuthService.firebase().logOut();
           if (context.mounted) {
             Navigator.of(context)
                 .pushNamedAndRemoveUntil(loginRoute, (route) => false);

@@ -4,7 +4,7 @@ import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/bmi
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/login_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/sign_up_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/user_food_nutrition_view.dart';
-import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/user_google_first_login_view.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/user_no_user_details_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/user_intake_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/user_main_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/user_discover_recipes_view.dart';
@@ -53,8 +53,7 @@ class MyApp extends StatelessWidget {
         userUserIntakeRoute: (context) => UserIntakeView(),
         userDiscoverRecipesRoute: (context) => const UserDiscoverRecipesView(),
         bmiCalculatorRoute: (context) => const BMICalculatorView(),
-        userGoogleFirstTimeLoginRoute: (context) =>
-            const UserGoogleFirstLoginView(),
+        userNoUserDetailsRoute: (context) => const UserNoUserDetailsView(),
       },
       home: const HomePage(),
     );

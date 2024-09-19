@@ -8,4 +8,4 @@ const userDiscoverRecipesRoute = '/user-home-page/discover-recipes/';
 const userUserIntakeRoute = '/user-home-page/user-intake-route/';
 const userFoodNutritionQueryRoute = '/user-home-page/food-nutrition-query/';
 const bmiCalculatorRoute = '/user-home-page/bmi-calculator/';
-const userGoogleFirstTimeLoginRoute = 'login/google-first-time/';
+const userNoUserDetailsRoute = 'login/google-first-time/';

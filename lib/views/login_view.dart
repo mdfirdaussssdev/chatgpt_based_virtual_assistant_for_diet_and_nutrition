@@ -203,7 +203,7 @@ class _LoginViewState extends State<LoginView> {
           } on CouldNotGetUserDetailsException {
             if (context.mounted) {
               Navigator.of(context).pushNamedAndRemoveUntil(
-                userGoogleFirstTimeLoginRoute,
+                userNoUserDetailsRoute,
                 (route) => false,
               );
             }
