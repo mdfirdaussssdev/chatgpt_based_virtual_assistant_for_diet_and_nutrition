@@ -11,3 +11,5 @@ class EmptyFieldViewException implements Exception {
     return 'EmptyFieldViewException: $message';
   }
 }
+
+class InvalidFieldViewException implements Exception {}

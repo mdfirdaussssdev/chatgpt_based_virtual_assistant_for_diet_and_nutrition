@@ -34,16 +34,6 @@ class _UserMainViewState extends State<UserMainView> {
       }
       await _userDetailsService.getUserDetails(ownerUserId: userId);
       if (!mounted) return;
-      // Fetch Quote
-      try {
-        final quote = await fetchQuote(); // Example async call
-        setState(() {
-          dailyQuote = quote;
-        });
-      } catch (e) {
-        throw ApiExceptions();
-      }
-      if (!mounted) return;
     } on CouldNotGetUserDetailsException {
       Navigator.of(context).pushNamedAndRemoveUntil(
         userNoUserDetailsRoute,
@@ -52,11 +42,23 @@ class _UserMainViewState extends State<UserMainView> {
     }
   }
 
+  Future<void> _fetchQuote() async {
+    try {
+      final quote = await fetchQuote(); // Example async call
+      setState(() {
+        dailyQuote = quote;
+      });
+    } catch (e) {
+      throw ApiExceptions();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _userDetailsService = FirebaseCloudStorage();
     _getInitialInfo();
+    _fetchQuote();
   }
 
   @override

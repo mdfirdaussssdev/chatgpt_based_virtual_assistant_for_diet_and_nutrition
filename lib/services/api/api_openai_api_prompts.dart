@@ -67,3 +67,16 @@ Only return english characters for everything!
 If $region is an invalid country or region, return 'error'.
 ''';
 }
+
+String getFoodCalorieCountPrompt(
+  String foodName,
+  int servings,
+) {
+  return '''
+What is the calorie count for the food name $foodName? $servings servings of it. 
+
+Only return an integer value in kcal. NO TEXTS, ONLY THE CALCULATED VALUE RETURNED.
+
+If unable to find the calorie count for the food, return 'food name not found'.
+''';
+}

@@ -126,3 +126,39 @@ Future<String> getFoodNutritionFromOpenAI(String food, int servings) async {
     throw Exception('Failed to get calorie info');
   }
 }
+
+Future<String> getFoodCalorieCountFromOpenAI(
+    String foodName, int servings) async {
+  final url = Uri.parse('https://api.openai.com/v1/chat/completions');
+  final response = await http.post(
+    url,
+    headers: {
+      'Authorization': 'Bearer $openAiApiKey',
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({
+      'model': 'gpt-4o-mini',
+      'messages': [
+        {
+          'role': 'system',
+          'content':
+              'You are a helpful assistant that provides calorie count based on food name and serving count.'
+        },
+        {
+          'role': 'user',
+          'content': getFoodCalorieCountPrompt(foodName, servings)
+        }
+      ],
+      'max_tokens': 200,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    return data['choices'][0]['message']['content'].trim();
+  } else {
+    print('Error: ${response.statusCode} - ${response.reasonPhrase}');
+    print('Response Body: ${response.body}');
+    throw Exception('Failed to get calorie info');
+  }
+}

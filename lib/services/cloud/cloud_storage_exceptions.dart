@@ -32,3 +32,12 @@ class CouldNotGetFoodRecipeQueryException extends CloudStorageExceptions {}
 class CouldNotUpdateFoodRecipeQueryException extends CloudStorageExceptions {}
 
 class CouldNotDeleteFoodRecipeQueryException extends CloudStorageExceptions {}
+
+// For user Intake
+class CouldNotDeleteUserIntakeException extends CloudStorageExceptions {}
+
+class CouldNotUpdateUserIntakeException extends CloudStorageExceptions {}
+
+class CouldNotGetUserIntakeException extends CloudStorageExceptions {}
+
+class CouldNotCreateUserIntakeException extends CloudStorageExceptions {}

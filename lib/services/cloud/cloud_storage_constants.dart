@@ -18,3 +18,13 @@ const foodRecipeIngredientsFieldName = 'ingredients';
 const foodRecipeInstructionsFieldName = 'instructions';
 const foodRecipeCheckedIngredientsFieldName = 'checked_ingredients';
 const foodRecipeCheckedInstructionsFieldName = 'checked_instructions';
+
+// For userIntake
+const userIntakeDateOfIntakeFieldName = 'date_of_intake';
+const userIntakeBreakfastFieldName = 'breakfast';
+const userIntakeLunchFieldName = 'lunch';
+const userIntakeDinnerFieldName = 'dinner';
+const userIntakeRecommendedCalorieIntakeFieldName =
+    'recommended_calorie_intake';
+const userIntakeCurrentCalorieIntakeFieldName = 'current_calorie_intake';
+const userIntakeLatestIntakeExplanationFieldName = 'latest_explanation';

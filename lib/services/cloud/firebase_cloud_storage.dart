@@ -1,6 +1,8 @@
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/models/intake_item.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_storage_constants.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_storage_exceptions.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_user_details.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_user_intake.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_user_latest_food_nutrition_query.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_user_latest_food_recipe_query.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,6 +16,8 @@ class FirebaseCloudStorage {
 
   final userLatestFoodRecipeQuery =
       FirebaseFirestore.instance.collection('userLatestFoodRecipeQuery');
+
+  final userIntake = FirebaseFirestore.instance.collection('userIntake');
 
 // For userDetails
 
@@ -246,6 +250,91 @@ class FirebaseCloudStorage {
         foodRecipeCheckedIngredientsFieldName: checkedIngredients,
         foodRecipeCheckedInstructionsFieldName: checkedInstructions,
       });
+    }
+  }
+
+// For userIntake
+  Future<void> deleteUserIntake({required String documentId}) async {
+    try {
+      await userIntake.doc(documentId).delete();
+    } catch (e) {
+      throw CouldNotDeleteUserIntakeException();
+    }
+  }
+
+  Future<void> updateUserIntake({
+    required final String documentId,
+    required final String dateOfIntake,
+    required final List<IntakeItem> breakfast,
+    required final List<IntakeItem> lunch,
+    required final List<IntakeItem> dinner,
+    required final int recommendedCalorieIntake,
+    required final int currentCalorieIntake,
+    required final String latestIntakeExplanation,
+  }) async {
+    try {
+      await userIntake.doc(documentId).update({
+        userIntakeDateOfIntakeFieldName: dateOfIntake,
+        userIntakeBreakfastFieldName:
+            breakfast.map((item) => item.toMap()).toList(),
+        userIntakeLunchFieldName: lunch.map((item) => item.toMap()).toList(),
+        userIntakeDinnerFieldName: dinner.map((item) => item.toMap()).toList(),
+        userIntakeRecommendedCalorieIntakeFieldName: recommendedCalorieIntake,
+        userIntakeCurrentCalorieIntakeFieldName: currentCalorieIntake,
+        userIntakeLatestIntakeExplanationFieldName: latestIntakeExplanation,
+      });
+    } catch (e) {
+      print('when trying to fix $e');
+      throw CouldNotUpdateUserIntakeException();
+    }
+  }
+
+  Future<CloudUserIntake> getUserIntake({
+    required String ownerUserId,
+    required String dateOfIntake,
+  }) async {
+    try {
+      final querySnapshot = await userIntake
+          .where(ownerUserIdFieldName, isEqualTo: ownerUserId)
+          .where(userIntakeDateOfIntakeFieldName, isEqualTo: dateOfIntake)
+          .get();
+      // Check if we have any documents
+      if (querySnapshot.docs.isNotEmpty) {
+        // Extract the first document and convert it to CloudLatestFoodRecipeQuery
+        final userDoc = querySnapshot.docs.first;
+        return CloudUserIntake.fromSnapshot(userDoc);
+      } else {
+        throw CouldNotGetUserIntakeException();
+      }
+    } catch (e) {
+      throw CouldNotGetUserIntakeException();
+    }
+  }
+
+  Future<String> createNewUserIntake({
+    required String ownerUserId,
+    required String dateOfIntake,
+    required List<IntakeItem> breakfast,
+    required List<IntakeItem> lunch,
+    required List<IntakeItem> dinner,
+    required int recommendedCalorieIntake,
+    required int currentCalorieIntake,
+    required String latestIntakeExplanation,
+  }) async {
+    try {
+      final docRef = await userIntake.add({
+        ownerUserIdFieldName: ownerUserId,
+        userIntakeDateOfIntakeFieldName: dateOfIntake,
+        userIntakeBreakfastFieldName: breakfast,
+        userIntakeLunchFieldName: lunch,
+        userIntakeDinnerFieldName: dinner,
+        userIntakeRecommendedCalorieIntakeFieldName: recommendedCalorieIntake,
+        userIntakeCurrentCalorieIntakeFieldName: currentCalorieIntake,
+        userIntakeLatestIntakeExplanationFieldName: latestIntakeExplanation,
+      });
+      return docRef.id; // Return the document ID
+    } catch (e) {
+      throw CouldNotCreateUserIntakeException();
     }
   }
 
