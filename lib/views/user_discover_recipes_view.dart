@@ -188,7 +188,6 @@ class _UserDiscoverRecipesViewState extends State<UserDiscoverRecipesView> {
                 _reasonText(),
                 SizedBox(height: screenHeight * 0.02),
                 _ingredientsSectionHeader(screenWidth, _ingredients.length),
-                SizedBox(height: screenHeight * 0.01),
                 _ingredientsSection(_ingredients, screenHeight, screenWidth),
                 _instructionsSectionHeader(screenWidth),
                 _instructionsSection(_instructions, screenHeight, screenWidth),
@@ -243,7 +242,7 @@ class _UserDiscoverRecipesViewState extends State<UserDiscoverRecipesView> {
           Expanded(
             child: Container(
               padding: EdgeInsets.all(screenWidth * 0.02),
-              color: Colors.red.shade300,
+              color: Colors.blue.shade400,
               child: const Text(
                 'Ingredients Required',
                 style: TextStyle(
@@ -280,7 +279,7 @@ class _UserDiscoverRecipesViewState extends State<UserDiscoverRecipesView> {
           Expanded(
             child: Container(
               padding: EdgeInsets.all(screenWidth * 0.02),
-              color: Colors.red.shade300,
+              color: Colors.blue.shade400,
               child: const Text(
                 'Instructions',
                 style: TextStyle(
@@ -316,7 +315,7 @@ class _UserDiscoverRecipesViewState extends State<UserDiscoverRecipesView> {
                   children: [
                     CheckboxListTile(
                       value: _checkedInstructions[index],
-                      activeColor: Colors.red,
+                      activeColor: Colors.green,
                       onChanged: (bool? value) {
                         setState(() {
                           _checkedInstructions[index] = value ?? false;
@@ -368,7 +367,7 @@ class _UserDiscoverRecipesViewState extends State<UserDiscoverRecipesView> {
                   children: [
                     CheckboxListTile(
                       value: _checkedIngredients[index],
-                      activeColor: Colors.red,
+                      activeColor: Colors.green,
                       onChanged: (bool? value) {
                         setState(() {
                           _checkedIngredients[index] = value ?? false;
@@ -438,7 +437,7 @@ class _UserDiscoverRecipesViewState extends State<UserDiscoverRecipesView> {
         'Discover Recipes',
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: Color.fromARGB(255, 201, 31, 31),
+          color: Colors.black,
         ),
       ),
       centerTitle: true,

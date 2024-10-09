@@ -356,7 +356,7 @@ class _UserFoodNutritionViewState extends State<UserFoodNutritionView> {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(screenWidth * 0.025),
-      color: Colors.green.shade400,
+      color: Colors.blue.shade400,
       child: const Text(
         'Eat More',
         style: TextStyle(
@@ -388,7 +388,7 @@ class _UserFoodNutritionViewState extends State<UserFoodNutritionView> {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(screenWidth * 0.025),
-      color: Colors.green.shade400,
+      color: Colors.blue.shade400,
       child: const Text(
         'Eat Less',
         style: TextStyle(
@@ -471,7 +471,7 @@ class _UserFoodNutritionViewState extends State<UserFoodNutritionView> {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(screenWidth * 0.025),
-      color: Colors.green.shade400,
+      color: Colors.blue.shade400,
       child: const Text(
         'Review the Nutritional Value of a Food',
         style: TextStyle(

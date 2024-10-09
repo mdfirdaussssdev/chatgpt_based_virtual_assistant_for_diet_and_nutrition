@@ -474,7 +474,7 @@ class _UserIntakeViewState extends State<UserIntakeView> {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
+                icon: const Icon(Icons.delete, color: Colors.grey),
                 onPressed: () {
                   _removeItem(item, mealType);
                 },
@@ -749,10 +749,10 @@ class _UserIntakeViewState extends State<UserIntakeView> {
   AppBar appBar(BuildContext context) {
     return AppBar(
       title: const Text(
-        'USER INTAKE',
+        'User Intake',
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: Color(0xFF28AADC),
+          color: Colors.black,
         ),
       ),
       centerTitle: true,
