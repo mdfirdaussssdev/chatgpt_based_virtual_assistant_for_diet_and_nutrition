@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:recase/recase.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class UserIntakeView extends StatefulWidget {
   const UserIntakeView({super.key});
@@ -247,6 +248,34 @@ class _UserIntakeViewState extends State<UserIntakeView> {
     );
   }
 
+  PieChart _buildCaloriePieChart() {
+    return PieChart(
+      PieChartData(
+        sections: [
+          PieChartSectionData(
+            value: currentCalorieIntake.toDouble(),
+            color: Colors.green.shade700,
+            title:
+                '$currentCalorieIntake kcal\n(${((currentCalorieIntake / recommendedCalorieIntake) * 100).toStringAsFixed(1)}%)',
+            radius: 50,
+            titlePositionPercentageOffset: 0.55,
+          ),
+          PieChartSectionData(
+            value: (recommendedCalorieIntake - currentCalorieIntake).toDouble(),
+            color: Colors.red.shade700,
+            title:
+                '${recommendedCalorieIntake - currentCalorieIntake} kcal\n(${(((recommendedCalorieIntake - currentCalorieIntake) / recommendedCalorieIntake) * 100).toStringAsFixed(1)}%)',
+            radius: 50,
+            titlePositionPercentageOffset: 0.55,
+          ),
+        ],
+        centerSpaceRadius: 50,
+        sectionsSpace: 2,
+        startDegreeOffset: 180,
+      ),
+    );
+  }
+
   Column _dateSelector(double screenHeight) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -435,11 +464,57 @@ class _UserIntakeViewState extends State<UserIntakeView> {
           mealType,
           style: Theme.of(context).textTheme.titleLarge,
         ),
-        ...items.map((item) => Text(
-              '${item.name}: ${item.calories} kcal, ${item.servings} serving(s)',
-            )),
+        ...items.map(
+          (item) => Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  '${item.name}: ${item.calories} kcal, ${item.servings} serving(s)',
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () {
+                  _removeItem(item, mealType);
+                },
+              ),
+            ],
+          ),
+        ),
       ],
     );
+  }
+
+  void _removeItem(IntakeItem item, String mealType) async {
+    setState(() {
+      // Remove the item locally based on meal type
+      if (mealType == 'Breakfast') {
+        breakfastItems.remove(item);
+      } else if (mealType == 'Lunch') {
+        lunchItems.remove(item);
+      } else if (mealType == 'Dinner') {
+        dinnerItems.remove(item);
+      }
+
+      // Recalculate the current calorie intake
+      currentCalorieIntake = currentCalorieIntake - item.calories;
+    });
+    try {
+      // Update the intake data in the cloud storage
+      await _userIntakeService.updateUserIntake(
+        dateOfIntake: _intakeDate.text,
+        recommendedCalorieIntake: recommendedCalorieIntake,
+        latestIntakeExplanation: latestIntakeExplanation,
+        documentId: documentId, // Document ID fetched from the cloud
+        breakfast: breakfastItems,
+        lunch: lunchItems,
+        dinner: dinnerItems,
+        currentCalorieIntake: currentCalorieIntake,
+      );
+    } catch (e) {
+      print('Error removing item: $e');
+    }
   }
 
   Column _currentMealsDetails(screenHeight) {
@@ -448,6 +523,10 @@ class _UserIntakeViewState extends State<UserIntakeView> {
       children: [
         _enterNewMealButton(),
         SizedBox(height: screenHeight * 0.02),
+        SizedBox(
+          height: screenHeight * 0.3,
+          child: _buildCaloriePieChart(),
+        ),
         Text('Recommended Calorie Intake: $recommendedCalorieIntake kcal'),
         Text('Current Total Calorie Intake: $currentCalorieIntake kcal'),
         Text(latestIntakeExplanation),
