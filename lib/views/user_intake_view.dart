@@ -127,6 +127,16 @@ class _UserIntakeViewState extends State<UserIntakeView> {
     return totalCalories.round(); // Return calculated value
   }
 
+// Function to generate explanation based on current calorie intake
+  Future<String> _generateExplanation(int currentCalorieIntake) async {
+    if (currentCalorieIntake == 0) {
+      return "Please enter your meals to keep track of your calorie intake.";
+    } else {
+      return await generateExplanationForCalorieIntakeFromOpenAI(
+          currentCalorieIntake, recommendedCalorieIntake);
+    }
+  }
+
   Future<void> _fetchUserIntakeForToday() async {
     String userid = AuthService.firebase().currentUser!.id;
     try {
@@ -185,7 +195,8 @@ class _UserIntakeViewState extends State<UserIntakeView> {
           dinner: dinnerItems,
           recommendedCalorieIntake: getRecommendedCalorieIntake,
           currentCalorieIntake: 0,
-          latestIntakeExplanation: latestIntakeExplanation,
+          latestIntakeExplanation:
+              await _generateExplanation(currentCalorieIntake),
         );
         recommendedCalorieIntake = getRecommendedCalorieIntake;
         documentId = newDocumentId;
@@ -232,6 +243,15 @@ class _UserIntakeViewState extends State<UserIntakeView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    SizedBox(
+                      height: screenHeight * 0.3,
+                      child: _buildCaloriePieChart(),
+                    ),
+                    SizedBox(height: screenHeight * 0.01),
+                    _pieChartLegends(screenWidth),
+                    SizedBox(height: screenHeight * 0.01),
+                    _buildCalorieProgressBar(),
+                    SizedBox(height: screenHeight * 0.01),
                     _dateSelector(screenHeight),
                     _displayCurrentMeals(),
                     const Divider(
@@ -241,6 +261,7 @@ class _UserIntakeViewState extends State<UserIntakeView> {
                     ),
                     if (_enterNewMeal) _enterYourMeal(screenHeight),
                     if (!_enterNewMeal) _currentMealsDetails(screenHeight),
+                    SizedBox(height: screenHeight * 0.01),
                   ],
                 ),
               ),
@@ -248,31 +269,142 @@ class _UserIntakeViewState extends State<UserIntakeView> {
     );
   }
 
-  PieChart _buildCaloriePieChart() {
-    return PieChart(
-      PieChartData(
-        sections: [
-          PieChartSectionData(
-            value: currentCalorieIntake.toDouble(),
-            color: Colors.green.shade700,
-            title:
-                '$currentCalorieIntake kcal\n(${((currentCalorieIntake / recommendedCalorieIntake) * 100).toStringAsFixed(1)}%)',
-            radius: 50,
-            titlePositionPercentageOffset: 0.55,
+  Widget _buildCalorieProgressBar() {
+    final progress = currentCalorieIntake / recommendedCalorieIntake;
+    return Column(
+      children: [
+        LinearProgressIndicator(
+          value: progress > 1 ? 1 : progress, // Cap at 1 for overconsumption
+          backgroundColor: Colors.grey.shade300,
+          valueColor: AlwaysStoppedAnimation<Color>(
+            progress > 1 ? Colors.red : Colors.blue,
           ),
-          PieChartSectionData(
-            value: (recommendedCalorieIntake - currentCalorieIntake).toDouble(),
-            color: Colors.red.shade700,
-            title:
-                '${recommendedCalorieIntake - currentCalorieIntake} kcal\n(${(((recommendedCalorieIntake - currentCalorieIntake) / recommendedCalorieIntake) * 100).toStringAsFixed(1)}%)',
-            radius: 50,
-            titlePositionPercentageOffset: 0.55,
+        ),
+        if (progress > 1)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text(
+              'Exceeded by ${(currentCalorieIntake - recommendedCalorieIntake).toInt()} kcal',
+              style: const TextStyle(
+                  color: Colors.red, fontWeight: FontWeight.bold),
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text(
+              'Remaining: ${(recommendedCalorieIntake - currentCalorieIntake).toInt()} kcal',
+              style: const TextStyle(
+                  color: Colors.green, fontWeight: FontWeight.bold),
+            ),
           ),
-        ],
-        centerSpaceRadius: 50,
-        sectionsSpace: 2,
-        startDegreeOffset: 180,
-      ),
+      ],
+    );
+  }
+
+  Row _pieChartLegends(double screenWidth) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.circle, color: Colors.blue.shade700, size: 16),
+            SizedBox(width: screenWidth * 0.01),
+            const Text('Current Intake'),
+          ],
+        ),
+        SizedBox(width: screenWidth * 0.01),
+        Row(
+          children: [
+            Icon(Icons.circle, color: Colors.grey.shade400, size: 16),
+            SizedBox(width: screenWidth * 0.01),
+            const Text('Remaining Intake'),
+          ],
+        ),
+        SizedBox(width: screenWidth * 0.01),
+      ],
+    );
+  }
+
+  Widget _buildCaloriePieChart() {
+    int exceededCalories = currentCalorieIntake - recommendedCalorieIntake;
+
+    // Case: Intake is greater than recommended
+    bool isExceeded = exceededCalories > 0;
+
+    return Stack(
+      alignment: Alignment.center, // Center the text inside the pie chart
+      children: [
+        PieChart(
+          PieChartData(
+            sections: isExceeded
+                ? [
+                    // Show blue for recommended calories (100%)
+                    PieChartSectionData(
+                      value: recommendedCalorieIntake.toDouble(),
+                      color: Colors.blue.shade700,
+                      title: '100%\n$recommendedCalorieIntake kcal',
+                      radius: 50,
+                      titlePositionPercentageOffset: 0.55,
+                    ),
+                    // Show red for exceeded calories
+                    PieChartSectionData(
+                      value: exceededCalories.toDouble(),
+                      color: Colors.red.shade400,
+                      title:
+                          '${((exceededCalories / recommendedCalorieIntake) * 100).toStringAsFixed(1)}%\n$exceededCalories kcal',
+                      radius: 50,
+                      titlePositionPercentageOffset: 0.55,
+                    ),
+                  ]
+                : [
+                    // Case: Intake is within recommended
+                    // Show blue for current intake
+                    PieChartSectionData(
+                      value: currentCalorieIntake.toDouble(),
+                      color: Colors.blue.shade700,
+                      title:
+                          '$currentCalorieIntake kcal\n(${((currentCalorieIntake / recommendedCalorieIntake) * 100).toStringAsFixed(1)}%)',
+                      radius: 50,
+                      titlePositionPercentageOffset: 0.55,
+                    ),
+                    // Show grey for remaining intake
+                    PieChartSectionData(
+                      value: (recommendedCalorieIntake - currentCalorieIntake)
+                          .toDouble(),
+                      color: Colors.grey.shade400,
+                      title:
+                          '${recommendedCalorieIntake - currentCalorieIntake} kcal\n(${(((recommendedCalorieIntake - currentCalorieIntake) / recommendedCalorieIntake) * 100).toStringAsFixed(1)}%)',
+                      radius: 50,
+                      titlePositionPercentageOffset: 0.55,
+                    ),
+                  ],
+            centerSpaceRadius: 50,
+            sectionsSpace: 2,
+            startDegreeOffset: 180,
+          ),
+        ),
+        // Text in the center of the pie chart
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '$recommendedCalorieIntake kcal',
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const Text(
+              'Recommended',
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -308,6 +440,9 @@ class _UserIntakeViewState extends State<UserIntakeView> {
       lastDate: DateTime(2101),
     );
     if (selectedDate != null) {
+      setState(() {
+        _isLoading = true;
+      });
       try {
         final CloudUserIntake userIntake =
             await _userIntakeService.getUserIntake(
@@ -369,7 +504,8 @@ class _UserIntakeViewState extends State<UserIntakeView> {
             dinner: dinnerItems,
             recommendedCalorieIntake: getRecommendedCalorieIntake,
             currentCalorieIntake: 0,
-            latestIntakeExplanation: latestIntakeExplanation,
+            latestIntakeExplanation:
+                await _generateExplanation(currentCalorieIntake),
           );
           recommendedCalorieIntake = getRecommendedCalorieIntake;
           documentId = newDocumentId;
@@ -408,6 +544,10 @@ class _UserIntakeViewState extends State<UserIntakeView> {
         }
       } catch (e) {
         return;
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -487,7 +627,8 @@ class _UserIntakeViewState extends State<UserIntakeView> {
   }
 
   void _removeItem(IntakeItem item, String mealType) async {
-    setState(() {
+    setState(() async {
+      _isLoading = true;
       // Remove the item locally based on meal type
       if (mealType == 'Breakfast') {
         breakfastItems.remove(item);
@@ -499,6 +640,8 @@ class _UserIntakeViewState extends State<UserIntakeView> {
 
       // Recalculate the current calorie intake
       currentCalorieIntake = currentCalorieIntake - item.calories;
+      latestIntakeExplanation =
+          await _generateExplanation(currentCalorieIntake);
     });
     try {
       // Update the intake data in the cloud storage
@@ -514,6 +657,10 @@ class _UserIntakeViewState extends State<UserIntakeView> {
       );
     } catch (e) {
       print('Error removing item: $e');
+    } finally {
+      setState(() {
+        _isLoading = true;
+      });
     }
   }
 
@@ -523,12 +670,6 @@ class _UserIntakeViewState extends State<UserIntakeView> {
       children: [
         _enterNewMealButton(),
         SizedBox(height: screenHeight * 0.02),
-        SizedBox(
-          height: screenHeight * 0.3,
-          child: _buildCaloriePieChart(),
-        ),
-        Text('Recommended Calorie Intake: $recommendedCalorieIntake kcal'),
-        Text('Current Total Calorie Intake: $currentCalorieIntake kcal'),
         Text(latestIntakeExplanation),
       ],
     );
@@ -557,136 +698,155 @@ class _UserIntakeViewState extends State<UserIntakeView> {
     );
   }
 
-  TextButton _enterNewMealButton() {
-    return TextButton(
-      onPressed: () {
-        setState(() {
-          // Clear the selected meal and input fields
-          _enterNewMeal = true;
-        });
-      },
-      style: TextButton.styleFrom(
-        backgroundColor: Colors.red,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.zero,
+  SizedBox _enterNewMealButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: TextButton(
+        onPressed: () {
+          setState(() {
+            // Clear the selected meal and input fields
+            _enterNewMeal = true;
+          });
+        },
+        style: TextButton.styleFrom(
+          backgroundColor: Colors.blue,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
         ),
-      ),
-      child: const Text(
-        'Enter New Meal',
-        style: TextStyle(color: Colors.white),
+        child: const Text(
+          'Enter New Meal',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
     );
   }
 
-  TextButton _cancelNewMealButton() {
-    return TextButton(
-      onPressed: () {
-        setState(() {
-          // Clear the selected meal and input fields
-          _enterNewMeal = false;
-          _selectedMeal = null;
-          _intakeItemName.clear();
-          _intakeServingCount.clear();
-        });
-      },
-      style: TextButton.styleFrom(
-        backgroundColor: Colors.red,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.zero,
+  SizedBox _cancelNewMealButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: TextButton(
+        onPressed: () {
+          setState(() {
+            // Clear the selected meal and input fields
+            _enterNewMeal = false;
+            _selectedMeal = null;
+            _intakeItemName.clear();
+            _intakeServingCount.clear();
+          });
+        },
+        style: TextButton.styleFrom(
+          backgroundColor: Colors.blue,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
         ),
-      ),
-      child: const Text(
-        'Cancel New Meal',
-        style: TextStyle(color: Colors.white),
+        child: const Text(
+          'Cancel New Meal',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
     );
   }
 
   SizedBox _submitMealButton() {
     return SizedBox(
-        width: double.infinity,
-        child: TextButton(
-          onPressed: () async {
-            final foodName = _intakeItemName.text;
-            final servings = int.tryParse(_intakeServingCount.text) ?? 0;
-            final mealType = _selectedMeal;
-            final selectedDate = _intakeDate.text;
-            try {
-              if (_intakeItemName.text.isEmpty ||
-                  _intakeServingCount.text.isEmpty ||
-                  _selectedMeal == null) {
-                throw EmptyFieldViewException('All fields must be filled');
-              }
-              final foodCalorieCount =
-                  await getFoodCalorieCountFromOpenAI(foodName, servings);
-              if (foodCalorieCount == 'food name not found') {
-                throw InvalidFieldViewException();
-              }
-              int foodCalorieCountInteger = int.parse(foodCalorieCount);
-              if (mealType == 'Breakfast') {
-                IntakeItem newBreakfastItem = IntakeItem(
-                    name: foodName.titleCase,
-                    calories: foodCalorieCountInteger,
-                    servings: servings);
-                breakfastItems.add(newBreakfastItem);
-              } else if (mealType == 'Lunch') {
-                IntakeItem newLunchItem = IntakeItem(
-                    name: foodName.titleCase,
-                    calories: foodCalorieCountInteger,
-                    servings: servings);
-                lunchItems.add(newLunchItem);
-              } else if (mealType == 'Dinner') {
-                IntakeItem newDinnerItem = IntakeItem(
-                    name: foodName.titleCase,
-                    calories: foodCalorieCountInteger,
-                    servings: servings);
-                dinnerItems.add(newDinnerItem);
-              }
-              await _userIntakeService.updateUserIntake(
-                documentId: documentId,
-                dateOfIntake: formatDateString(selectedDate),
-                breakfast: breakfastItems,
-                lunch: lunchItems,
-                dinner: dinnerItems,
-                recommendedCalorieIntake: recommendedCalorieIntake,
-                currentCalorieIntake:
-                    (currentCalorieIntake + foodCalorieCountInteger),
-                latestIntakeExplanation: latestIntakeExplanation,
-              );
-              currentCalorieIntake =
-                  currentCalorieIntake + foodCalorieCountInteger;
-              setState(() {
-                // Clear the selected meal and input fields
-                _enterNewMeal = false;
-                _selectedMeal = null;
-                _intakeItemName.clear();
-                _intakeServingCount.clear();
-              });
-            } on EmptyFieldViewException {
-              await showErrorDialog(
-                context,
-                'Please fill in all the fields',
-              );
-            } on InvalidFieldViewException {
-              await showErrorDialog(
-                context,
-                'Please fill in a proper food name',
-              );
-            } catch (e) {
-              print(e);
+      width: double.infinity,
+      child: TextButton(
+        onPressed: () async {
+          setState(() {
+            _isLoading = true;
+          });
+          final foodName = _intakeItemName.text;
+          final servings = int.tryParse(_intakeServingCount.text) ?? 0;
+          final mealType = _selectedMeal;
+          final selectedDate = _intakeDate.text;
+          try {
+            if (_intakeItemName.text.isEmpty ||
+                _intakeServingCount.text.isEmpty ||
+                _selectedMeal == null) {
+              throw EmptyFieldViewException('All fields must be filled');
             }
-          },
-          style: TextButton.styleFrom(
-            backgroundColor: Colors.blue,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.zero,
-            ),
+            final foodCalorieCount =
+                await getFoodCalorieCountFromOpenAI(foodName, servings);
+            if (foodCalorieCount == 'food name not found') {
+              throw InvalidFieldViewException();
+            }
+            int foodCalorieCountInteger = int.parse(foodCalorieCount);
+            if (mealType == 'Breakfast') {
+              IntakeItem newBreakfastItem = IntakeItem(
+                  name: foodName.titleCase,
+                  calories: foodCalorieCountInteger,
+                  servings: servings);
+              breakfastItems.add(newBreakfastItem);
+            } else if (mealType == 'Lunch') {
+              IntakeItem newLunchItem = IntakeItem(
+                  name: foodName.titleCase,
+                  calories: foodCalorieCountInteger,
+                  servings: servings);
+              lunchItems.add(newLunchItem);
+            } else if (mealType == 'Dinner') {
+              IntakeItem newDinnerItem = IntakeItem(
+                  name: foodName.titleCase,
+                  calories: foodCalorieCountInteger,
+                  servings: servings);
+              dinnerItems.add(newDinnerItem);
+            }
+            await _userIntakeService.updateUserIntake(
+              documentId: documentId,
+              dateOfIntake: formatDateString(selectedDate),
+              breakfast: breakfastItems,
+              lunch: lunchItems,
+              dinner: dinnerItems,
+              recommendedCalorieIntake: recommendedCalorieIntake,
+              currentCalorieIntake:
+                  (currentCalorieIntake + foodCalorieCountInteger),
+              latestIntakeExplanation: await _generateExplanation(
+                  currentCalorieIntake + foodCalorieCountInteger),
+            );
+            currentCalorieIntake =
+                currentCalorieIntake + foodCalorieCountInteger;
+            latestIntakeExplanation =
+                await _generateExplanation(currentCalorieIntake);
+            setState(() {
+              // Clear the selected meal and input fields
+              _enterNewMeal = false;
+              _selectedMeal = null;
+              _intakeItemName.clear();
+              _intakeServingCount.clear();
+            });
+          } on EmptyFieldViewException {
+            await showErrorDialog(
+              context,
+              'Please fill in all the fields',
+            );
+          } on InvalidFieldViewException {
+            await showErrorDialog(
+              context,
+              'Please fill in a proper food name',
+            );
+          } catch (e) {
+            print(e);
+          } finally {
+            setState(
+              () {
+                _isLoading = false;
+              },
+            );
+          }
+        },
+        style: TextButton.styleFrom(
+          backgroundColor: Colors.blue,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
           ),
-          child: const Text(
-            'Submit Meal',
-            style: TextStyle(color: Colors.white),
-          ),
-        ));
+        ),
+        child: const Text(
+          'Submit Meal',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+    );
   }
 
   TextField _intakeServingCountField() {
@@ -756,16 +916,6 @@ class _UserIntakeViewState extends State<UserIntakeView> {
         ),
       ),
       centerTitle: true,
-      leading: IconButton(
-        onPressed: () async {
-          await AuthService.firebase().logOut();
-          if (context.mounted) {
-            Navigator.of(context)
-                .pushNamedAndRemoveUntil(loginRoute, (route) => false);
-          }
-        },
-        icon: const Icon(Icons.arrow_back),
-      ),
     );
   }
 }

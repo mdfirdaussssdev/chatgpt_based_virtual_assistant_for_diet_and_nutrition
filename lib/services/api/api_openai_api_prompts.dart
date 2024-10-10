@@ -80,3 +80,13 @@ Only return an integer value in kcal. NO TEXTS, ONLY THE CALCULATED VALUE RETURN
 If unable to find the calorie count for the food, return 'food name not found'.
 ''';
 }
+
+String generateExplanationForUserIntakePrompt(
+    int currentCalorieIntake, int recommendedCalorieIntake) {
+  return '''
+The current calorie intake for the user is $currentCalorieIntake. 
+The recommended calorie intake for the user is $recommendedCalorieIntake.
+
+Can you advice on what they should do regarding their diet. A short paragraph would be more than enough. Do not give advice regarding using a food diary or application as that is the point of this application.
+''';
+}
