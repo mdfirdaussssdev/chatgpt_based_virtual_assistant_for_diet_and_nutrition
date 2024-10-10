@@ -4,10 +4,15 @@ import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/api/api_fetch_quote.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/auth/auth_service.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_storage_exceptions.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_user_details.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_user_intake.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/firebase_cloud_storage.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/utilities/dialogs/logout_dialog.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/utilities/user_intake_helper.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/widgets/calorie_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 
 class UserMainView extends StatefulWidget {
   const UserMainView({super.key});
@@ -18,9 +23,13 @@ class UserMainView extends StatefulWidget {
 
 class _UserMainViewState extends State<UserMainView> {
   List<UserMainActionsModel> userMainActions = [];
-  late final FirebaseCloudStorage _userDetailsService;
+  late final FirebaseCloudStorage _userFirebaseService;
 
   String dailyQuote = '';
+  int recommendedCalorieIntake = 0;
+  int currentCalorieIntake = 0;
+  String latestIntakeExplanation = '';
+  String documentId = '';
 
   void _getInitialInfo() {
     userMainActions = UserMainActionsModel.getUserMainActions();
@@ -32,13 +41,67 @@ class _UserMainViewState extends State<UserMainView> {
       if (userId == null) {
         throw Exception("User ID is null");
       }
-      await _userDetailsService.getUserDetails(ownerUserId: userId);
+      await _userFirebaseService.getUserDetails(ownerUserId: userId);
       if (!mounted) return;
     } on CouldNotGetUserDetailsException {
       Navigator.of(context).pushNamedAndRemoveUntil(
         userNoUserDetailsRoute,
         (route) => false,
       );
+    }
+  }
+
+  Future<void> _fetchUserIntakeForToday() async {
+    String userId = AuthService.firebase().currentUser!.id;
+    try {
+      // Get today's date in required format
+      final String todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      // Fetch user intake from your cloud storage
+      final CloudUserIntake userIntake =
+          await _userFirebaseService.getUserIntake(
+        ownerUserId: userId,
+        dateOfIntake: todayDate,
+      );
+
+      setState(() {
+        recommendedCalorieIntake = userIntake.recommendedCalorieIntake;
+        currentCalorieIntake = userIntake.currentCalorieIntake;
+        latestIntakeExplanation = userIntake.latestIntakeExplanation;
+        documentId = userIntake.documentId;
+      });
+    } on CouldNotGetUserIntakeException {
+      CloudUserDetails userDetails =
+          await _userFirebaseService.getUserDetails(ownerUserId: userId);
+      int userAge = UserIntakeHelper.calculateAge(userDetails.userDateOfBirth);
+      final getRecommendedCalorieIntake =
+          UserIntakeHelper.calculateRecommendedCalorieIntake(
+        userDetails.userGender,
+        userDetails.userWeight,
+        userDetails.userHeight,
+        userAge,
+        userDetails.userActivityLevel,
+        userDetails.userGoal,
+      );
+
+      try {
+        final newDocumentId = await _userFirebaseService.createNewUserIntake(
+          ownerUserId: userId,
+          dateOfIntake: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+          breakfast: [],
+          lunch: [],
+          dinner: [],
+          recommendedCalorieIntake: getRecommendedCalorieIntake,
+          currentCalorieIntake: 0,
+          latestIntakeExplanation: await UserIntakeHelper.generateExplanation(
+              currentCalorieIntake, recommendedCalorieIntake),
+        );
+        recommendedCalorieIntake = getRecommendedCalorieIntake;
+        documentId = newDocumentId;
+      } catch (e) {
+        print("Error parsing valid string: $e");
+      }
+    } catch (e) {
+      return;
     }
   }
 
@@ -56,16 +119,18 @@ class _UserMainViewState extends State<UserMainView> {
   @override
   void initState() {
     super.initState();
-    _userDetailsService = FirebaseCloudStorage();
+    _userFirebaseService = FirebaseCloudStorage();
     _getInitialInfo();
     _fetchQuote();
+    _fetchDetails();
+    _fetchUserIntakeForToday();
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    _fetchDetails();
+    final String todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
     return Scaffold(
       appBar: appBar(context),
@@ -74,6 +139,34 @@ class _UserMainViewState extends State<UserMainView> {
           children: [
             _userActionsSection(userMainActions),
             SizedBox(height: screenHeight * 0.03),
+
+            // StreamBuilder for calorie intake
+            StreamBuilder<CloudUserIntake>(
+              stream: FirebaseCloudStorage().getUserIntakeStream(
+                ownerUserId: AuthService.firebase().currentUser!.id,
+                dateOfIntake: todayDate,
+              ),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator(); // Loading state
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else if (!snapshot.hasData) {
+                  return Text('No data found.');
+                }
+
+                // Get the latest intake
+                final userTodayIntake = snapshot.data!;
+
+                return _todayCalorieProgressBar(
+                  userTodayIntake.currentCalorieIntake,
+                  userTodayIntake.recommendedCalorieIntake,
+                  screenWidth,
+                  screenHeight,
+                );
+              },
+            ),
+
             _healthToolsSection(screenWidth, screenHeight, context),
             _motivationalQuoteSection(screenWidth, dailyQuote),
           ],
@@ -111,11 +204,39 @@ class _UserMainViewState extends State<UserMainView> {
   }
 }
 
+Container _todayCalorieProgressBar(int currentCalorieIntake,
+    int recommendedCalorieIntake, screenWidth, screenHeight) {
+  print('Current Calorie Intake: $currentCalorieIntake');
+  print('Recommended Calorie Intake: $recommendedCalorieIntake');
+  return Container(
+    width: double.infinity,
+    color: Colors.blue.shade100,
+    padding: EdgeInsets.all(screenWidth * 0.05),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const Text(
+          "Today's Calorie Intake Progress Bar",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: screenHeight * 0.02),
+        CalorieProgressBar(
+            currentCalorieIntake: currentCalorieIntake,
+            recommendedCalorieIntake: recommendedCalorieIntake),
+      ],
+    ),
+  );
+}
+
 Container _healthToolsSection(
     double screenWidth, double screenHeight, BuildContext context) {
   return Container(
     width: double.infinity,
-    color: Colors.blue.shade100,
+    color: Colors.grey.shade200,
     padding: EdgeInsets.all(screenWidth * 0.05),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,7 +352,7 @@ Container _motivationalQuoteSection(double screenWidth, dailyQuote) {
   return Container(
     width: double.infinity,
     padding: EdgeInsets.all(screenWidth * 0.05),
-    color: Colors.orange.shade100,
+    color: Colors.blue.shade100,
     child: dailyQuote.isEmpty
         ? const Center(child: CircularProgressIndicator())
         : Text(

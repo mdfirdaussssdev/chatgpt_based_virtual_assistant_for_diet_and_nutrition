@@ -338,6 +338,24 @@ class FirebaseCloudStorage {
     }
   }
 
+  Stream<CloudUserIntake> getUserIntakeStream({
+    required String ownerUserId,
+    required String dateOfIntake,
+  }) {
+    return userIntake
+        .where(ownerUserIdFieldName, isEqualTo: ownerUserId)
+        .where(userIntakeDateOfIntakeFieldName, isEqualTo: dateOfIntake)
+        .snapshots()
+        .map((snapshot) {
+      if (snapshot.docs.isNotEmpty) {
+        final userDoc = snapshot.docs.first;
+        return CloudUserIntake.fromSnapshot(userDoc);
+      } else {
+        throw CouldNotGetUserIntakeException();
+      }
+    });
+  }
+
   // ensures that only one instance of the
   // FirebaseCloudStorage class exists throughout the application.
 

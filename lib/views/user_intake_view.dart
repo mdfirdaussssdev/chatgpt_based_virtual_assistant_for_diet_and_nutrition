@@ -1,4 +1,3 @@
-import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/constants/routes.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/models/intake_item.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/api/api_openai_api_function.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/auth/auth_service.dart';
@@ -8,11 +7,13 @@ import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/firebase_cloud_storage.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/utilities/dialogs/error_dialog.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/view_exceptions.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/widgets/calorie_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:recase/recase.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/utilities/user_intake_helper.dart';
 
 class UserIntakeView extends StatefulWidget {
   const UserIntakeView({super.key});
@@ -58,93 +59,14 @@ class _UserIntakeViewState extends State<UserIntakeView> {
   late final TextEditingController _intakeDate;
   late final FirebaseCloudStorage _userIntakeService;
 
-  int calculateAge(DateTime dateOfBirth) {
-    final today = DateTime.now();
-    int age = today.year - dateOfBirth.year;
-
-    // Adjust age if the user has not yet had their birthday this year
-    if (today.month < dateOfBirth.month ||
-        (today.month == dateOfBirth.month && today.day < dateOfBirth.day)) {
-      age--;
-    }
-
-    return age;
-  }
-
-  int calculateRecommendedCalorieIntake(
-    String gender,
-    int weight,
-    int height,
-    int age,
-    String activityLevel,
-    String goal,
-  ) {
-    double bmr;
-
-    // Calculate BMR based on gender
-    if (gender.toLowerCase() == 'male') {
-      bmr = 10 * weight + 6.25 * height - 5 * age + 5;
-    } else if (gender.toLowerCase() == 'female') {
-      bmr = 10 * weight + 6.25 * height - 5 * age - 161;
-    } else {
-      throw ArgumentError('Invalid gender provided: $gender');
-    }
-
-    // Define activity factors
-    double activityFactor;
-    switch (activityLevel.toLowerCase()) {
-      case 'sedentary':
-        activityFactor = 1.2;
-        break;
-      case 'lightly active':
-        activityFactor = 1.375;
-        break;
-      case 'moderately active':
-        activityFactor = 1.55;
-        break;
-      case 'very active':
-        activityFactor = 1.725;
-        break;
-      case 'super active':
-        activityFactor = 1.9;
-        break;
-      default:
-        throw ArgumentError('Invalid activity level provided: $activityLevel');
-    }
-
-    // Calculate total calorie intake
-    double totalCalories = bmr * activityFactor;
-
-    // Adjust calories based on goal
-    if (goal.toLowerCase() == 'lose weight') {
-      totalCalories -= 500; // Subtract 500 kcal for weight loss
-    } else if (goal.toLowerCase() == 'gain weight') {
-      totalCalories += 300; // Add 300 kcal for weight gain
-    } else if (goal.toLowerCase() != 'maintain weight') {
-      throw ArgumentError('Invalid goal provided: $goal');
-    }
-
-    return totalCalories.round(); // Return calculated value
-  }
-
-// Function to generate explanation based on current calorie intake
-  Future<String> _generateExplanation(int currentCalorieIntake) async {
-    if (currentCalorieIntake == 0) {
-      return "Please enter your meals to keep track of your calorie intake.";
-    } else {
-      return await generateExplanationForCalorieIntakeFromOpenAI(
-          currentCalorieIntake, recommendedCalorieIntake);
-    }
-  }
-
   Future<void> _fetchUserIntakeForToday() async {
-    String userid = AuthService.firebase().currentUser!.id;
+    String userId = AuthService.firebase().currentUser!.id;
     try {
       // Get today's date in required format
       final String todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
       // Fetch user intake from your cloud storage
       final CloudUserIntake userIntake = await _userIntakeService.getUserIntake(
-        ownerUserId: userid,
+        ownerUserId: userId,
         dateOfIntake: todayDate,
       );
 
@@ -175,9 +97,10 @@ class _UserIntakeViewState extends State<UserIntakeView> {
       });
     } on CouldNotGetUserIntakeException {
       CloudUserDetails userDetails =
-          await _userIntakeService.getUserDetails(ownerUserId: userid);
-      int userAge = calculateAge(userDetails.userDateOfBirth);
-      final getRecommendedCalorieIntake = calculateRecommendedCalorieIntake(
+          await _userIntakeService.getUserDetails(ownerUserId: userId);
+      int userAge = UserIntakeHelper.calculateAge(userDetails.userDateOfBirth);
+      final getRecommendedCalorieIntake =
+          UserIntakeHelper.calculateRecommendedCalorieIntake(
         userDetails.userGender,
         userDetails.userWeight,
         userDetails.userHeight,
@@ -188,15 +111,15 @@ class _UserIntakeViewState extends State<UserIntakeView> {
 
       try {
         final newDocumentId = await _userIntakeService.createNewUserIntake(
-          ownerUserId: userid,
+          ownerUserId: userId,
           dateOfIntake: DateFormat('yyyy-MM-dd').format(DateTime.now()),
           breakfast: breakfastItems,
           lunch: lunchItems,
           dinner: dinnerItems,
           recommendedCalorieIntake: getRecommendedCalorieIntake,
           currentCalorieIntake: 0,
-          latestIntakeExplanation:
-              await _generateExplanation(currentCalorieIntake),
+          latestIntakeExplanation: await UserIntakeHelper.generateExplanation(
+              currentCalorieIntake, recommendedCalorieIntake),
         );
         recommendedCalorieIntake = getRecommendedCalorieIntake;
         documentId = newDocumentId;
@@ -250,7 +173,9 @@ class _UserIntakeViewState extends State<UserIntakeView> {
                     SizedBox(height: screenHeight * 0.01),
                     _pieChartLegends(screenWidth),
                     SizedBox(height: screenHeight * 0.01),
-                    _buildCalorieProgressBar(),
+                    CalorieProgressBar(
+                        currentCalorieIntake: currentCalorieIntake,
+                        recommendedCalorieIntake: recommendedCalorieIntake),
                     SizedBox(height: screenHeight * 0.01),
                     _dateSelector(screenHeight),
                     _displayCurrentMeals(),
@@ -266,39 +191,6 @@ class _UserIntakeViewState extends State<UserIntakeView> {
                 ),
               ),
             ),
-    );
-  }
-
-  Widget _buildCalorieProgressBar() {
-    final progress = currentCalorieIntake / recommendedCalorieIntake;
-    return Column(
-      children: [
-        LinearProgressIndicator(
-          value: progress > 1 ? 1 : progress, // Cap at 1 for overconsumption
-          backgroundColor: Colors.grey.shade300,
-          valueColor: AlwaysStoppedAnimation<Color>(
-            progress > 1 ? Colors.red : Colors.blue,
-          ),
-        ),
-        if (progress > 1)
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Text(
-              'Exceeded by ${(currentCalorieIntake - recommendedCalorieIntake).toInt()} kcal',
-              style: const TextStyle(
-                  color: Colors.red, fontWeight: FontWeight.bold),
-            ),
-          )
-        else
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Text(
-              'Remaining: ${(recommendedCalorieIntake - currentCalorieIntake).toInt()} kcal',
-              style: const TextStyle(
-                  color: Colors.green, fontWeight: FontWeight.bold),
-            ),
-          ),
-      ],
     );
   }
 
@@ -477,8 +369,10 @@ class _UserIntakeViewState extends State<UserIntakeView> {
       } on CouldNotGetUserIntakeException {
         CloudUserDetails userDetails = await _userIntakeService.getUserDetails(
             ownerUserId: AuthService.firebase().currentUser!.id);
-        int userAge = calculateAge(userDetails.userDateOfBirth);
-        final getRecommendedCalorieIntake = calculateRecommendedCalorieIntake(
+        int userAge =
+            UserIntakeHelper.calculateAge(userDetails.userDateOfBirth);
+        final getRecommendedCalorieIntake =
+            UserIntakeHelper.calculateRecommendedCalorieIntake(
           userDetails.userGender,
           userDetails.userWeight,
           userDetails.userHeight,
@@ -504,8 +398,8 @@ class _UserIntakeViewState extends State<UserIntakeView> {
             dinner: dinnerItems,
             recommendedCalorieIntake: getRecommendedCalorieIntake,
             currentCalorieIntake: 0,
-            latestIntakeExplanation:
-                await _generateExplanation(currentCalorieIntake),
+            latestIntakeExplanation: await UserIntakeHelper.generateExplanation(
+                currentCalorieIntake, recommendedCalorieIntake),
           );
           recommendedCalorieIntake = getRecommendedCalorieIntake;
           documentId = newDocumentId;
@@ -627,8 +521,8 @@ class _UserIntakeViewState extends State<UserIntakeView> {
   }
 
   void _removeItem(IntakeItem item, String mealType) async {
-    setState(() async {
-      _isLoading = true;
+    setState(() {
+      _isLoading = true; // Start loading state
       // Remove the item locally based on meal type
       if (mealType == 'Breakfast') {
         breakfastItems.remove(item);
@@ -637,16 +531,19 @@ class _UserIntakeViewState extends State<UserIntakeView> {
       } else if (mealType == 'Dinner') {
         dinnerItems.remove(item);
       }
-
       // Recalculate the current calorie intake
-      currentCalorieIntake = currentCalorieIntake - item.calories;
-      latestIntakeExplanation =
-          await _generateExplanation(currentCalorieIntake);
+      currentCalorieIntake -= item.calories; // Subtract calories directly
     });
+
     try {
+      // Generate the latest intake explanation asynchronously
+      latestIntakeExplanation = await UserIntakeHelper.generateExplanation(
+          currentCalorieIntake, recommendedCalorieIntake);
+
       // Update the intake data in the cloud storage
       await _userIntakeService.updateUserIntake(
-        dateOfIntake: _intakeDate.text,
+        dateOfIntake: DateFormat("yyyy-MM-dd")
+            .format(DateFormat("dd/MM/yyyy").parse(_intakeDate.text)),
         recommendedCalorieIntake: recommendedCalorieIntake,
         latestIntakeExplanation: latestIntakeExplanation,
         documentId: documentId, // Document ID fetched from the cloud
@@ -659,7 +556,7 @@ class _UserIntakeViewState extends State<UserIntakeView> {
       print('Error removing item: $e');
     } finally {
       setState(() {
-        _isLoading = true;
+        _isLoading = false; // Stop loading state
       });
     }
   }
@@ -801,13 +698,16 @@ class _UserIntakeViewState extends State<UserIntakeView> {
               recommendedCalorieIntake: recommendedCalorieIntake,
               currentCalorieIntake:
                   (currentCalorieIntake + foodCalorieCountInteger),
-              latestIntakeExplanation: await _generateExplanation(
-                  currentCalorieIntake + foodCalorieCountInteger),
+              latestIntakeExplanation:
+                  await UserIntakeHelper.generateExplanation(
+                      currentCalorieIntake + foodCalorieCountInteger,
+                      recommendedCalorieIntake),
             );
             currentCalorieIntake =
                 currentCalorieIntake + foodCalorieCountInteger;
             latestIntakeExplanation =
-                await _generateExplanation(currentCalorieIntake);
+                await UserIntakeHelper.generateExplanation(
+                    currentCalorieIntake, recommendedCalorieIntake);
             setState(() {
               // Clear the selected meal and input fields
               _enterNewMeal = false;
