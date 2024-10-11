@@ -9,3 +9,4 @@ const userUserIntakeRoute = '/user-home-page/user-intake-route/';
 const userFoodNutritionQueryRoute = '/user-home-page/food-nutrition-query/';
 const bmiCalculatorRoute = '/user-home-page/bmi-calculator/';
 const userNoUserDetailsRoute = 'login/google-first-time/';
+const userProfileRoute = '/user-home-page/user-profile';

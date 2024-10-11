@@ -8,6 +8,7 @@ import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/use
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/user_intake_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/user_main_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/user_discover_recipes_view.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/user_profile_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/verify_email_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -50,10 +51,11 @@ class MyApp extends StatelessWidget {
         userHomePageRoute: (context) => const UserMainView(),
         // need to change this later
         userFoodNutritionQueryRoute: (context) => const UserFoodNutritionView(),
-        userUserIntakeRoute: (context) => UserIntakeView(),
+        userUserIntakeRoute: (context) => const UserIntakeView(),
         userDiscoverRecipesRoute: (context) => const UserDiscoverRecipesView(),
         bmiCalculatorRoute: (context) => const BMICalculatorView(),
         userNoUserDetailsRoute: (context) => const UserNoUserDetailsView(),
+        userProfileRoute: (context) => const UserProfileView(),
       },
       home: const HomePage(),
     );

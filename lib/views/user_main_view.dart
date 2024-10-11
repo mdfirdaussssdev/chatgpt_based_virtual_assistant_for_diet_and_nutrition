@@ -184,6 +184,14 @@ class _UserMainViewState extends State<UserMainView> {
         ),
       ),
       actions: [
+        // User profile icon
+        IconButton(
+          icon: const Icon(Icons.account_circle), // Profile icon
+          onPressed: () {
+            Navigator.pushNamed(context, userProfileRoute);
+          },
+        ),
+        // Logout button
         IconButton(
           onPressed: () async {
             final shouldLogout = await showLogOutDialog(context);
