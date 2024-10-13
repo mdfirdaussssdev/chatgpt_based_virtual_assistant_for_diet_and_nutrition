@@ -38,6 +38,7 @@ class FirebaseCloudStorage {
     required String userGender,
     required String userGoal,
     required String userActivityLevel,
+    required String userId,
   }) async {
     try {
       await userDetails.doc(documentId).update({
@@ -96,6 +97,22 @@ class FirebaseCloudStorage {
     } catch (e) {
       throw CouldNotCreateUserDetailsException();
     }
+  }
+
+  Stream<CloudUserDetails> getUserDetailsStream({
+    required String ownerUserId,
+  }) {
+    return userDetails
+        .where(ownerUserIdFieldName, isEqualTo: ownerUserId)
+        .snapshots()
+        .map((snapshot) {
+      if (snapshot.docs.isNotEmpty) {
+        final userDoc = snapshot.docs.first;
+        return CloudUserDetails.fromSnapshot(userDoc);
+      } else {
+        throw CouldNotGetUserIntakeException();
+      }
+    });
   }
 
 // For userLatestFoodNutritionQuery

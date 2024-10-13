@@ -10,3 +10,5 @@ const userFoodNutritionQueryRoute = '/user-home-page/food-nutrition-query/';
 const bmiCalculatorRoute = '/user-home-page/bmi-calculator/';
 const userNoUserDetailsRoute = 'login/google-first-time/';
 const userProfileRoute = '/user-home-page/user-profile';
+const editUserProfileRoute = '/user-home-page/user-profile/edit';
+const editUserPasswordRoute = '/user-home-page/user-profile/password';

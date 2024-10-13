@@ -1,9 +1,11 @@
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/constants/routes.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/constants/user_details.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/auth/auth_exceptions.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/auth/auth_service.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/firebase_cloud_storage.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/utilities/dialogs/error_dialog.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/view_exceptions.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/widgets/custom_dropdowns_user_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:multiselect/multiselect.dart';
@@ -24,30 +26,7 @@ class _UserNoUserDetailsViewState extends State<UserNoUserDetailsView> {
   String? _selectedGender;
   String? _selectedActivityLevel;
   String? _activityLevelExplanation;
-  final List<String> _activityLevels = [
-    'Sedentary',
-    'Lightly Active',
-    'Moderately Active',
-    'Very Active',
-    'Super Active',
-  ];
 
-  final List<String> _genders = [
-    'Male',
-    'Female',
-  ];
-
-  final List<String> _goals = [
-    'Gain Weight',
-    'Lose Weight',
-    'Maintain Weight',
-  ];
-
-  // For multiselect
-  final List<String> _listOfDiseases = [
-    'Diabetes',
-    'High Blood Pressure',
-  ];
   List<String> _selectedValues = [];
   void _onChanged(List<String> selectedValues) {
     setState(() {
@@ -209,7 +188,7 @@ class _UserNoUserDetailsViewState extends State<UserNoUserDetailsView> {
 
   DropDownMultiSelect<String> _selectDiseases() {
     return DropDownMultiSelect(
-      options: _listOfDiseases,
+      options: listOfDiseases,
       onChanged: _onChanged,
       selectedValues: _selectedValues,
       // hint: const Text('data'),
@@ -222,21 +201,10 @@ class _UserNoUserDetailsViewState extends State<UserNoUserDetailsView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        DropdownButtonFormField<String>(
-          value: _selectedGender,
-          hint: const Text(
-            'Gender?',
-          ),
-          decoration: const InputDecoration(
-            labelText: 'Select your Gender',
-            border: OutlineInputBorder(),
-          ),
-          items: _genders.map((String gender) {
-            return DropdownMenuItem<String>(
-              value: gender,
-              child: Text(gender),
-            );
-          }).toList(),
+        CustomDropdownUserDetails(
+          selectedValue: _selectedGender,
+          items: genders, // Use the imported constant
+          hint: 'Gender?',
           onChanged: (String? newValue) {
             setState(() {
               _selectedGender = newValue;
@@ -251,19 +219,10 @@ class _UserNoUserDetailsViewState extends State<UserNoUserDetailsView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        DropdownButtonFormField<String>(
-          value: _selectedGoal,
-          hint: const Text('Goal?'),
-          decoration: const InputDecoration(
-            labelText: 'Select your Goal',
-            border: OutlineInputBorder(),
-          ),
-          items: _goals.map((String goal) {
-            return DropdownMenuItem<String>(
-              value: goal,
-              child: Text(goal),
-            );
-          }).toList(),
+        CustomDropdownUserDetails(
+          selectedValue: _selectedGoal,
+          items: goals, // Use the imported constant
+          hint: 'Goal?',
           onChanged: (String? newValue) {
             setState(() {
               _selectedGoal = newValue;
@@ -278,21 +237,10 @@ class _UserNoUserDetailsViewState extends State<UserNoUserDetailsView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        DropdownButtonFormField<String>(
-          value: _selectedActivityLevel,
-          hint: const Text(
-            'Activity Level?',
-          ),
-          decoration: const InputDecoration(
-            labelText: 'Select your Activity Level',
-            border: OutlineInputBorder(),
-          ),
-          items: _activityLevels.map((String level) {
-            return DropdownMenuItem<String>(
-              value: level,
-              child: Text(level),
-            );
-          }).toList(),
+        CustomDropdownUserDetails(
+          selectedValue: _selectedActivityLevel,
+          items: activityLevels, // Use the imported constant
+          hint: 'Activity Level?',
           onChanged: (String? newValue) {
             setState(() {
               _selectedActivityLevel = newValue;

@@ -137,7 +137,7 @@ class BMICalculatorViewState extends State<BMICalculatorView> {
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.zero, // No rounded corners
                   ),
-                  padding: EdgeInsets.symmetric(
+                  padding: const EdgeInsets.symmetric(
                       horizontal: 16.0, vertical: 8.0), // Text color
                   textStyle: const TextStyle(
                     fontWeight: FontWeight.bold,
