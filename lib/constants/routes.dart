@@ -12,3 +12,4 @@ const userNoUserDetailsRoute = 'login/google-first-time/';
 const userProfileRoute = '/user-home-page/user-profile';
 const editUserProfileRoute = '/user-home-page/user-profile/edit';
 const editUserPasswordRoute = '/user-home-page/user-profile/password';
+const userHydrationTrackerRoute = '/user-home-page/hydration-tracker';

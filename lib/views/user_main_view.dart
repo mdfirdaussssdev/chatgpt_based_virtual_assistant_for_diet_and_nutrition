@@ -2,6 +2,7 @@ import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/constants
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/models/user_actions_model.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/api/api_exceptions.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/api/api_fetch_quote.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/api/api_openai_api_function.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/auth/auth_service.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_storage_exceptions.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_user_details.dart';
@@ -307,8 +308,7 @@ Container _healthToolsSection(
             SizedBox(height: screenHeight * 0.02),
             GestureDetector(
               onTap: () {
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                    userHomePageRoute, (route) => false);
+                Navigator.pushNamed(context, userHydrationTrackerRoute);
               },
               child: Container(
                 width: double.infinity,
@@ -327,13 +327,79 @@ Container _healthToolsSection(
                     Row(
                       children: [
                         SvgPicture.asset(
-                          'assets/images/calorie_cal.svg',
+                          'assets/images/water_intake.svg',
                           width: 20,
                           height: 20,
                         ),
                         SizedBox(width: screenWidth * 0.03),
                         const Text(
-                          'Calorie Calculator',
+                          'Daily Water Intake',
+                          style: TextStyle(
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.black,
+                      size: 16,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: screenHeight * 0.02),
+            GestureDetector(
+              onTap: () async {
+                String randomDailyAffirmation =
+                    await generateRandomDailyAffirmationFromOpenAI();
+                showDialog(
+                  // ignore: use_build_context_synchronously
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text(
+                        'Here’s a random daily affirmation for you:',
+                        textAlign: TextAlign.center,
+                      ),
+                      content: Text(randomDailyAffirmation),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Close the dialog
+                          },
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
+                decoration: const BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Colors.black,
+                      width: 1.0,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        SvgPicture.asset(
+                          'assets/images/quote.svg',
+                          width: 20,
+                          height: 20,
+                        ),
+                        SizedBox(width: screenWidth * 0.03),
+                        const Text(
+                          'Daily Affirmations',
                           style: TextStyle(
                             color: Colors.black,
                           ),

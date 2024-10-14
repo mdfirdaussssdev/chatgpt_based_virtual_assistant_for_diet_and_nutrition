@@ -90,3 +90,9 @@ The recommended calorie intake for the user is $recommendedCalorieIntake.
 Can you advice on what they should do regarding their diet. A short paragraph would be more than enough. Do not give advice regarding using a food diary or application as that is the point of this application.
 ''';
 }
+
+String generateRandomDailyAffirmation() {
+  return '''
+Return me a random daily affirmation. ONLY THE DAILY AFFIRMATION AND NOTHING ELSE.
+''';
+}

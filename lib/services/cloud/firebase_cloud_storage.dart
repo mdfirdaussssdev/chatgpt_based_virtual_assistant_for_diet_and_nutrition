@@ -6,6 +6,7 @@ import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_user_latest_food_nutrition_query.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_user_latest_food_recipe_query.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/cloud/cloud_user_daily_water_intake.dart';
 
 class FirebaseCloudStorage {
   // name of collection is userDetails in Firebase Database
@@ -18,6 +19,9 @@ class FirebaseCloudStorage {
       FirebaseFirestore.instance.collection('userLatestFoodRecipeQuery');
 
   final userIntake = FirebaseFirestore.instance.collection('userIntake');
+
+  final userDailyWaterIntake =
+      FirebaseFirestore.instance.collection('userDailyWaterIntake');
 
 // For userDetails
 
@@ -301,7 +305,6 @@ class FirebaseCloudStorage {
         userIntakeLatestIntakeExplanationFieldName: latestIntakeExplanation,
       });
     } catch (e) {
-      print('when trying to fix $e');
       throw CouldNotUpdateUserIntakeException();
     }
   }
@@ -371,6 +374,83 @@ class FirebaseCloudStorage {
         throw CouldNotGetUserIntakeException();
       }
     });
+  }
+
+  // For userDailyWaterIntake
+  Future<void> deleteUserDailyWaterIntake({required String documentId}) async {
+    try {
+      await userDailyWaterIntake.doc(documentId).delete();
+    } catch (e) {
+      throw CouldNotDeleteUserDailyWaterIntakeException();
+    }
+  }
+
+  Future<void> updateUserDailyWaterIntake({
+    required final String documentId,
+    required final String dateOfIntake,
+    required final double recommendedMinWaterIntake,
+    required final double recommendedMaxWaterIntake,
+    required final double currentWaterIntake,
+    required final double yesterdayWaterIntake,
+  }) async {
+    try {
+      await userDailyWaterIntake.doc(documentId).update({
+        userDailyWaterIntakeDateOfIntakeFieldName: dateOfIntake,
+        userDailyWaterIntakeRecommendedMinWaterIntakeFieldName:
+            recommendedMinWaterIntake,
+        userDailyWaterIntakeRecommendedMaxWaterIntakeFieldName:
+            recommendedMaxWaterIntake,
+        userDailyWaterIntakeCurrentWaterIntakeFieldName: currentWaterIntake,
+        userDailyWaterIntakeYesterdayWaterIntakeFieldName: yesterdayWaterIntake,
+      });
+    } catch (e) {
+      throw CouldNotUpdateUserDailyWaterIntakeException();
+    }
+  }
+
+  Future<CloudUserDailyWaterIntake> getUserDailyWaterIntake({
+    required String ownerUserId,
+  }) async {
+    try {
+      final querySnapshot = await userDailyWaterIntake
+          .where(ownerUserIdFieldName, isEqualTo: ownerUserId)
+          .get();
+      // Check if we have any documents
+      if (querySnapshot.docs.isNotEmpty) {
+        // Extract the first document and convert it
+        final userDoc = querySnapshot.docs.first;
+        return CloudUserDailyWaterIntake.fromSnapshot(userDoc);
+      } else {
+        throw CouldNotGetUserDailyWaterIntakeException();
+      }
+    } catch (e) {
+      throw CouldNotGetUserDailyWaterIntakeException();
+    }
+  }
+
+  Future<String> createNewUserDailyWaterIntake({
+    required String ownerUserId,
+    required String dateOfIntake,
+    required double recommendedMinWaterIntake,
+    required double recommendedMaxWaterIntake,
+    required double currentWaterIntake,
+    required double yesterdayWaterIntake,
+  }) async {
+    try {
+      final docRef = await userDailyWaterIntake.add({
+        ownerUserIdFieldName: ownerUserId,
+        userDailyWaterIntakeDateOfIntakeFieldName: dateOfIntake,
+        userDailyWaterIntakeRecommendedMinWaterIntakeFieldName:
+            recommendedMinWaterIntake,
+        userDailyWaterIntakeRecommendedMaxWaterIntakeFieldName:
+            recommendedMaxWaterIntake,
+        userDailyWaterIntakeCurrentWaterIntakeFieldName: currentWaterIntake,
+        userDailyWaterIntakeYesterdayWaterIntakeFieldName: yesterdayWaterIntake,
+      });
+      return docRef.id; // Return the document ID
+    } catch (e) {
+      throw CouldNotCreateUserDailyWaterIntakeException();
+    }
   }
 
   // ensures that only one instance of the

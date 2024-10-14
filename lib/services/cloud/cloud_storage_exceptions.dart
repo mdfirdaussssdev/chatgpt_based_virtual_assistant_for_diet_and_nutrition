@@ -41,3 +41,15 @@ class CouldNotUpdateUserIntakeException extends CloudStorageExceptions {}
 class CouldNotGetUserIntakeException extends CloudStorageExceptions {}
 
 class CouldNotCreateUserIntakeException extends CloudStorageExceptions {}
+
+// For user Daily Water Intake
+class CouldNotDeleteUserDailyWaterIntakeException
+    extends CloudStorageExceptions {}
+
+class CouldNotUpdateUserDailyWaterIntakeException
+    extends CloudStorageExceptions {}
+
+class CouldNotGetUserDailyWaterIntakeException extends CloudStorageExceptions {}
+
+class CouldNotCreateUserDailyWaterIntakeException
+    extends CloudStorageExceptions {}

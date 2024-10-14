@@ -28,3 +28,13 @@ const userIntakeRecommendedCalorieIntakeFieldName =
     'recommended_calorie_intake';
 const userIntakeCurrentCalorieIntakeFieldName = 'current_calorie_intake';
 const userIntakeLatestIntakeExplanationFieldName = 'latest_explanation';
+
+// For userDailyWaterIntake
+const userDailyWaterIntakeDateOfIntakeFieldName = 'date_of_intake';
+const userDailyWaterIntakeRecommendedMinWaterIntakeFieldName =
+    'recommended_min_water_intake';
+const userDailyWaterIntakeRecommendedMaxWaterIntakeFieldName =
+    'recommended_max_water_intake';
+const userDailyWaterIntakeCurrentWaterIntakeFieldName = 'current_water_intake';
+const userDailyWaterIntakeYesterdayWaterIntakeFieldName =
+    'yesterday_water_intake';

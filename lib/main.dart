@@ -6,6 +6,7 @@ import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/edi
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/login_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/sign_up_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/user_food_nutrition_view.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/user_hydration_tracker.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/user_no_user_details_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/user_intake_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/user_main_view.dart';
@@ -60,6 +61,7 @@ class MyApp extends StatelessWidget {
         userProfileRoute: (context) => const UserProfileView(),
         editUserProfileRoute: (context) => const EditUserProfileView(),
         editUserPasswordRoute: (context) => const EditUserPasswordView(),
+        userHydrationTrackerRoute: (context) => const HydrationTrackerView(),
       },
       home: const HomePage(),
     );
