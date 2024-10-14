@@ -130,12 +130,15 @@ class _EditUserProfileViewState extends State<EditUserProfileView> {
       );
 
       // Optionally, show a success message or navigate back
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully!')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile updated successfully!')),
+        );
+      }
     } catch (e) {
       // Handle errors appropriately
-      print('Error updating profile: $e');
+      // print('Error updating profile: $e');
+      return;
     }
   }
 

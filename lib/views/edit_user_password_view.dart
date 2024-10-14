@@ -33,10 +33,11 @@ class _EditUserPasswordViewState extends State<EditUserPasswordView> {
 
         // Update the password
         await user.updatePassword(newPassword);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Password updated successfully!')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Password updated successfully!')),
+          );
+        }
 
         // Clear the fields after update
         _oldPasswordController.clear();
@@ -49,9 +50,11 @@ class _EditUserPasswordViewState extends State<EditUserPasswordView> {
         } else {
           message = 'Failed to update password. Please try again.';
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(message)),
+          );
+        }
       }
     }
   }

@@ -20,9 +20,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await dotenv.load(fileName: ".env");
-    print('Environment variables loaded successfully');
   } catch (e) {
-    print('Failed to load environment variables: $e');
+    return;
   }
   runApp(const MyApp());
 }

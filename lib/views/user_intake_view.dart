@@ -124,7 +124,8 @@ class _UserIntakeViewState extends State<UserIntakeView> {
         recommendedCalorieIntake = getRecommendedCalorieIntake;
         documentId = newDocumentId;
       } catch (e) {
-        print("Error parsing valid string: $e");
+        // print("Error parsing valid string: $e");
+        return;
       }
     } catch (e) {
       return;
@@ -383,11 +384,11 @@ class _UserIntakeViewState extends State<UserIntakeView> {
         breakfastItems = [];
         lunchItems = [];
         dinnerItems = [];
-        print("Breakfast items: $breakfastItems");
-        print("Lunch items: $lunchItems");
-        print("Dinner items: $dinnerItems");
-        print(
-            "Date of intake: ${DateFormat('yyyy-MM-dd').format(selectedDate)}");
+        // print("Breakfast items: $breakfastItems");
+        // print("Lunch items: $lunchItems");
+        // print("Dinner items: $dinnerItems");
+        // print(
+        //     "Date of intake: ${DateFormat('yyyy-MM-dd').format(selectedDate)}");
 
         try {
           final newDocumentId = await _userIntakeService.createNewUserIntake(
@@ -434,7 +435,8 @@ class _UserIntakeViewState extends State<UserIntakeView> {
             documentId = userIntake.documentId;
           });
         } catch (e) {
-          print("Error parsing valid string: $e");
+          // print("Error parsing valid string: $e");
+          return;
         }
       } catch (e) {
         return;
@@ -553,7 +555,8 @@ class _UserIntakeViewState extends State<UserIntakeView> {
         currentCalorieIntake: currentCalorieIntake,
       );
     } catch (e) {
-      print('Error removing item: $e');
+      // print('Error removing item: $e');
+      return;
     } finally {
       setState(() {
         _isLoading = false; // Stop loading state
@@ -716,17 +719,22 @@ class _UserIntakeViewState extends State<UserIntakeView> {
               _intakeServingCount.clear();
             });
           } on EmptyFieldViewException {
-            await showErrorDialog(
-              context,
-              'Please fill in all the fields',
-            );
+            if (mounted) {
+              await showErrorDialog(
+                context,
+                'Please fill in all the fields',
+              );
+            }
           } on InvalidFieldViewException {
-            await showErrorDialog(
-              context,
-              'Please fill in a proper food name',
-            );
+            if (mounted) {
+              await showErrorDialog(
+                context,
+                'Please fill in a proper food name',
+              );
+            }
           } catch (e) {
-            print(e);
+            // print(e);
+            return;
           } finally {
             setState(
               () {

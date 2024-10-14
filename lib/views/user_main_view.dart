@@ -99,7 +99,8 @@ class _UserMainViewState extends State<UserMainView> {
         recommendedCalorieIntake = getRecommendedCalorieIntake;
         documentId = newDocumentId;
       } catch (e) {
-        print("Error parsing valid string: $e");
+        // print("Error parsing valid string: $e");
+        return;
       }
     } catch (e) {
       return;
@@ -215,8 +216,8 @@ class _UserMainViewState extends State<UserMainView> {
 
 Container _todayCalorieProgressBar(int currentCalorieIntake,
     int recommendedCalorieIntake, screenWidth, screenHeight) {
-  print('Current Calorie Intake: $currentCalorieIntake');
-  print('Recommended Calorie Intake: $recommendedCalorieIntake');
+  // print('Current Calorie Intake: $currentCalorieIntake');
+  // print('Recommended Calorie Intake: $recommendedCalorieIntake');
   return Container(
     width: double.infinity,
     color: Colors.blue.shade100,

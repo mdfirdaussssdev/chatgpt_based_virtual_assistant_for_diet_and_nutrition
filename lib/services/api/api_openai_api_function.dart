@@ -33,8 +33,8 @@ Future<String> getCaloriesFromOpenAI(String food) async {
     // Even if you only request one response, it will still be returned in an array with a single item.
     return data['choices'][0]['message']['content'].trim();
   } else {
-    print('Error: ${response.statusCode} - ${response.reasonPhrase}');
-    print('Response Body: ${response.body}');
+    // print('Error: ${response.statusCode} - ${response.reasonPhrase}');
+    // print('Response Body: ${response.body}');
     throw Exception('Failed to get calorie info');
   }
 }
@@ -121,8 +121,8 @@ Future<String> getFoodNutritionFromOpenAI(String food, int servings) async {
     final data = jsonDecode(response.body);
     return data['choices'][0]['message']['content'].trim();
   } else {
-    print('Error: ${response.statusCode} - ${response.reasonPhrase}');
-    print('Response Body: ${response.body}');
+    // print('Error: ${response.statusCode} - ${response.reasonPhrase}');
+    // print('Response Body: ${response.body}');
     throw Exception('Failed to get calorie info');
   }
 }
@@ -157,8 +157,8 @@ Future<String> getFoodCalorieCountFromOpenAI(
     final data = jsonDecode(response.body);
     return data['choices'][0]['message']['content'].trim();
   } else {
-    print('Error: ${response.statusCode} - ${response.reasonPhrase}');
-    print('Response Body: ${response.body}');
+    // print('Error: ${response.statusCode} - ${response.reasonPhrase}');
+    // print('Response Body: ${response.body}');
     throw Exception('Failed to get calorie info');
   }
 }
@@ -194,8 +194,8 @@ Future<String> generateExplanationForCalorieIntakeFromOpenAI(
     final data = jsonDecode(response.body);
     return data['choices'][0]['message']['content'].trim();
   } else {
-    print('Error: ${response.statusCode} - ${response.reasonPhrase}');
-    print('Response Body: ${response.body}');
+    // print('Error: ${response.statusCode} - ${response.reasonPhrase}');
+    // print('Response Body: ${response.body}');
     throw Exception('Failed to get calorie info');
   }
 }
@@ -226,8 +226,8 @@ Future<String> generateRandomDailyAffirmationFromOpenAI() async {
     final data = jsonDecode(response.body);
     return data['choices'][0]['message']['content'].trim();
   } else {
-    print('Error: ${response.statusCode} - ${response.reasonPhrase}');
-    print('Response Body: ${response.body}');
+    // print('Error: ${response.statusCode} - ${response.reasonPhrase}');
+    // print('Response Body: ${response.body}');
     throw Exception('Failed to get calorie info');
   }
 }
