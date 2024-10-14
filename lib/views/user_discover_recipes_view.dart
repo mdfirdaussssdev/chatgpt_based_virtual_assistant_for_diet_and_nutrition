@@ -17,6 +17,7 @@ class UserDiscoverRecipesView extends StatefulWidget {
 }
 
 class _UserDiscoverRecipesViewState extends State<UserDiscoverRecipesView> {
+  bool _isLoading = false;
   late final TextEditingController _region;
   late final FirebaseCloudStorage _firebaseCloudService;
 
@@ -47,6 +48,9 @@ class _UserDiscoverRecipesViewState extends State<UserDiscoverRecipesView> {
   }
 
   Future<void> _initializeResult() async {
+    setState(() {
+      _isLoading = true; // Start loading
+    });
     try {
       final userDoc = await _firebaseCloudService.getUserFoodRecipeQueryDetails(
         ownerUserId: AuthService.firebase().currentUser!.id,
@@ -67,10 +71,17 @@ class _UserDiscoverRecipesViewState extends State<UserDiscoverRecipesView> {
         _ingredients = [];
         _instructions = [];
       });
+    } finally {
+      setState(() {
+        _isLoading = false; // Stop loading
+      });
     }
   }
 
   Future<void> _fetchUserDetails() async {
+    setState(() {
+      _isLoading = true; // Start loading
+    });
     try {
       final userId = AuthService.firebase().currentUser?.id;
       if (userId == null) {
@@ -84,11 +95,18 @@ class _UserDiscoverRecipesViewState extends State<UserDiscoverRecipesView> {
       });
     } catch (e) {
       throw CouldNotGetUserDetailsException();
+    } finally {
+      setState(() {
+        _isLoading = false; // Stop loading
+      });
     }
   }
 
   Future<void> _performSearch() async {
     if (_region.text.isNotEmpty) {
+      setState(() {
+        _isLoading = true; // Start loading
+      });
       String region = _region.text;
       final recipeTitle = await getRandomRecipeFoodName(region, userGoal);
       // recipe title will be error if region input is invalid
@@ -127,6 +145,9 @@ class _UserDiscoverRecipesViewState extends State<UserDiscoverRecipesView> {
         _output = 'Please enter a valid region.';
       });
     }
+    setState(() {
+      _isLoading = false; // Stop loading
+    });
   }
 
   void _parseOutput(String output) {
@@ -166,35 +187,47 @@ class _UserDiscoverRecipesViewState extends State<UserDiscoverRecipesView> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
       appBar: appBar(context),
       backgroundColor: Colors.grey.shade200,
-      body: Container(
-        color: Colors.grey.shade200,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _regionField(screenWidth, screenHeight),
-              SizedBox(height: screenHeight * 0.01),
-              if (_output != '') _errorOutput(),
-              SizedBox(height: screenHeight * 0.01),
-              if (_ingredients.isNotEmpty && _instructions.isNotEmpty) ...[
-                if (_imageUrl != null) _recipeImage(screenWidth, screenHeight),
+      body: Stack(
+        // Change to Stack to allow overlay
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _regionField(screenWidth, screenHeight),
                 SizedBox(height: screenHeight * 0.01),
-                _titleText(),
+                if (_output != '') _errorOutput(),
                 SizedBox(height: screenHeight * 0.01),
-                _reasonText(),
-                SizedBox(height: screenHeight * 0.02),
-                _ingredientsSectionHeader(screenWidth, _ingredients.length),
-                _ingredientsSection(_ingredients, screenHeight, screenWidth),
-                _instructionsSectionHeader(screenWidth),
-                _instructionsSection(_instructions, screenHeight, screenWidth),
+                if (_ingredients.isNotEmpty && _instructions.isNotEmpty) ...[
+                  if (_imageUrl != null)
+                    _recipeImage(screenWidth, screenHeight),
+                  SizedBox(height: screenHeight * 0.01),
+                  _titleText(),
+                  SizedBox(height: screenHeight * 0.01),
+                  _reasonText(),
+                  SizedBox(height: screenHeight * 0.02),
+                  _ingredientsSectionHeader(screenWidth, _ingredients.length),
+                  _ingredientsSection(_ingredients, screenHeight, screenWidth),
+                  _instructionsSectionHeader(screenWidth),
+                  _instructionsSection(
+                      _instructions, screenHeight, screenWidth),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
+          if (_isLoading) // Show loading indicator overlay
+            Positioned.fill(
+              child: Container(
+                color: Colors.black54, // Semi-transparent background
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
