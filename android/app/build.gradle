@@ -29,9 +29,17 @@ android {
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 23
         targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        versionCode = 1
+        versionName = "1.0"
     }
+    signingConfigs{
+        release{
+            keyAlias 'my-key-alias'
+            keyPassword ' pps12345'
+            storeFile file('C:/Users/realf/my-release-key.jks')
+            storePassword 'pps12345'
+        }
+        }
 
     buildTypes {
         release {
