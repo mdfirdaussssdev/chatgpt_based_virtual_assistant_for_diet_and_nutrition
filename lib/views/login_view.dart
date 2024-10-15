@@ -63,11 +63,22 @@ class _LoginViewState extends State<LoginView> {
                     _loginButtonWithGoogle(context, screenHeight, screenWidth),
               ),
               SizedBox(height: screenHeight * 0.02),
-              _signUpButton(context)
+              _signUpButton(context),
+              _forgetPasswordButton(context),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  TextButton _forgetPasswordButton(BuildContext context) {
+    return TextButton(
+      onPressed: () {
+        Navigator.of(context)
+            .pushNamedAndRemoveUntil(forgetPasswordRoute, (route) => false);
+      },
+      child: const Text('Forget password?'),
     );
   }
 

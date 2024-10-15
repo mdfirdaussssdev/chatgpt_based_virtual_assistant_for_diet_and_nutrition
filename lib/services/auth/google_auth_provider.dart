@@ -77,4 +77,9 @@ class GoogleAuthProvider implements AuthProvider {
     throw UnimplementedError(
         'Google Sign-In does not require email verification.');
   }
+
+  @override
+  Future<void> sendPasswordReset({required String toEmail}) {
+    throw UnimplementedError();
+  }
 }

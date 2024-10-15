@@ -3,6 +3,7 @@ import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/services/
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/bmi_calculator_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/edit_user_password_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/edit_user_profile_view.dart';
+import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/forgot_password_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/login_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/sign_up_view.dart';
 import 'package:chatgpt_based_virtual_assistant_for_diet_and_nutrition/views/user_food_nutrition_view.dart';
@@ -51,7 +52,7 @@ class MyApp extends StatelessWidget {
         verifyEmailRoute: (context) => const VerifyEmailView(),
         signUpRoute: (context) => const SignUpView(),
         userHomePageRoute: (context) => const UserMainView(),
-        // need to change this later
+        forgetPasswordRoute: (context) => const ForgotPasswordView(),
         userFoodNutritionQueryRoute: (context) => const UserFoodNutritionView(),
         userUserIntakeRoute: (context) => const UserIntakeView(),
         userDiscoverRecipesRoute: (context) => const UserDiscoverRecipesView(),
