@@ -39,7 +39,7 @@ android {
             storeFile file('C:/Users/realf/my-release-key.jks')
             storePassword 'pps12345'
         }
-        }
+    }
 
     buildTypes {
         release {
