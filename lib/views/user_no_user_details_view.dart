@@ -138,7 +138,8 @@ class _UserNoUserDetailsViewState extends State<UserNoUserDetailsView> {
               _weight.text.isEmpty ||
               _height.text.isEmpty ||
               _selectedGoal == null ||
-              _selectedGender == null) {
+              _selectedGender == null ||
+              _selectedActivityLevel == null) {
             throw EmptyFieldViewException('All fields must be filled');
           }
           await _userDetailsService.createNewUserDetails(
