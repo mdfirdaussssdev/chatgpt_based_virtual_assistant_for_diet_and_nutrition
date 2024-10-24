@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 Future<String> getImageForRecipe(String recipeName) async {
-  const apiKey = 'AIzaSyDlRfbxmi7eGVIvaLrfdiuO_duwxWB_c7w';
-  const searchEngineId = '70656725772b2439b';
+  // const apiKey = ; add own API key
+  // const searchEngineId = ; add own searchEngineId
 
   final url = Uri.parse(
     'https://www.googleapis.com/customsearch/v1?q=$recipeName&cx=$searchEngineId&searchType=image&key=$apiKey',
